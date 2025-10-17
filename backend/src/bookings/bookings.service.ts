@@ -1,9 +1,17 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChapaService } from 'chapa-nestjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Booking, BookingStatus, PaymentProvider } from '../schemas/booking.schema';
+import {
+  Booking,
+  BookingStatus,
+  PaymentProvider,
+} from '../schemas/booking.schema';
 import { Event } from '../schemas/event.schema';
 import { User } from '../schemas/user.schema';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -19,7 +27,11 @@ export class BookingsService {
     private emailService: EmailService,
   ) {}
 
-  async createBooking(eventId: string, createBookingDto: CreateBookingDto, userId: string) {
+  async createBooking(
+    eventId: string,
+    createBookingDto: CreateBookingDto,
+    userId: string,
+  ) {
     const event = await this.eventModel.findById(eventId);
     if (!event) {
       throw new NotFoundException('Event not found');
@@ -36,14 +48,16 @@ export class BookingsService {
     // Check capacity
     const existingBookings = await this.bookingModel.aggregate([
       { $match: { eventId: event._id, status: BookingStatus.CONFIRMED } },
-      { $group: { _id: null, totalQuantity: { $sum: '$quantity' } } }
+      { $group: { _id: null, totalQuantity: { $sum: '$quantity' } } },
     ]);
 
     const bookedQuantity = existingBookings[0]?.totalQuantity || 0;
     const availableCapacity = event.capacity - bookedQuantity;
 
     if (createBookingDto.quantity > availableCapacity) {
-      throw new BadRequestException(`Only ${availableCapacity} spots available`);
+      throw new BadRequestException(
+        `Only ${availableCapacity} spots available`,
+      );
     }
 
     const user = await this.userModel.findById(userId);
@@ -55,11 +69,13 @@ export class BookingsService {
     const existingBooking = await this.bookingModel.findOne({
       userId,
       eventId,
-      status: { $in: [BookingStatus.CONFIRMED, BookingStatus.PENDING_PAYMENT] }
+      status: { $in: [BookingStatus.CONFIRMED, BookingStatus.PENDING_PAYMENT] },
     });
 
     if (existingBooking) {
-      throw new BadRequestException('You already have a booking for this event');
+      throw new BadRequestException(
+        'You already have a booking for this event',
+      );
     }
 
     const totalAmount = event.price * createBookingDto.quantity;
@@ -70,41 +86,46 @@ export class BookingsService {
       eventId,
       quantity: createBookingDto.quantity,
       paymentInfo: {
-        provider: event.price > 0 ? PaymentProvider.CHAPA : PaymentProvider.NONE,
+        provider:
+          event.price > 0 ? PaymentProvider.CHAPA : PaymentProvider.NONE,
         amount: totalAmount,
         currency: 'ETB',
-      }
+      },
     });
 
     if (event.price === 0) {
       // Free event - confirm immediately
       booking.status = BookingStatus.CONFIRMED;
       await booking.save();
-      
+
       // Update event registered count
-      await this.eventModel.findByIdAndUpdate(
-        eventId,
-        { $inc: { registeredCount: booking.quantity } }
-      );
+      await this.eventModel.findByIdAndUpdate(eventId, {
+        $inc: { registeredCount: booking.quantity },
+      });
 
       // Send confirmation email
       await this.sendBookingConfirmationEmail(user, event, booking);
-      
+
       return { booking, message: 'Booking confirmed successfully' };
     } else {
       // Paid event - initialize Chapa payment
       const txRef = uuidv4();
       booking.paymentInfo.reference = txRef;
-      
+
       try {
-        const checkoutUrl = await this.initializeChapaPayment(booking, user, event, txRef);
+        const checkoutUrl = await this.initializeChapaPayment(
+          booking,
+          user,
+          event,
+          txRef,
+        );
         booking.paymentInfo.checkoutUrl = checkoutUrl;
         await booking.save();
 
-        return { 
-          booking, 
+        return {
+          booking,
           checkoutUrl,
-          message: 'Please complete payment to confirm booking'
+          message: 'Please complete payment to confirm booking',
         };
       } catch (error) {
         throw new BadRequestException('Failed to initialize payment');
@@ -112,7 +133,12 @@ export class BookingsService {
     }
   }
 
-  private async initializeChapaPayment(booking: Booking, user: User, event: Event, txRef: string) {
+  private async initializeChapaPayment(
+    booking: Booking,
+    user: User,
+    event: Event,
+    txRef: string,
+  ) {
     const response = await this.chapaService.initialize({
       first_name: user.fullName.split(' ')[0],
       last_name: user.fullName.split(' ').slice(1).join(' ') || 'User',
@@ -145,21 +171,24 @@ export class BookingsService {
       // Verify payment with Chapa
       try {
         const verification = await this.chapaService.verify({ tx_ref: txRef });
-        
+
         if (verification.data.status === 'success') {
           booking.status = BookingStatus.CONFIRMED;
           booking.paymentInfo.transactionId = verification.data.reference;
           await booking.save();
 
           // Update event registered count
-          await this.eventModel.findByIdAndUpdate(
-            booking.eventId,
-            { $inc: { registeredCount: booking.quantity } }
-          );
+          await this.eventModel.findByIdAndUpdate(booking.eventId, {
+            $inc: { registeredCount: booking.quantity },
+          });
 
           // Send confirmation email
-          await this.sendBookingConfirmationEmail(booking.userId as any, booking.eventId as any, booking);
-          
+          await this.sendBookingConfirmationEmail(
+            booking.userId as any,
+            booking.eventId as any,
+            booking,
+          );
+
           return { message: 'Payment confirmed successfully' };
         }
       } catch (error) {
@@ -170,9 +199,12 @@ export class BookingsService {
     } else {
       booking.status = BookingStatus.PAYMENT_FAILED;
       await booking.save();
-      
+
       // Send payment failed email
-      await this.sendPaymentFailedEmail(booking.userId as any, booking.eventId as any);
+      await this.sendPaymentFailedEmail(
+        booking.userId as any,
+        booking.eventId as any,
+      );
     }
 
     return { message: 'Payment status updated' };
@@ -180,7 +212,7 @@ export class BookingsService {
 
   async getUserBookings(userId: string, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
-    
+
     const [bookings, total] = await Promise.all([
       this.bookingModel
         .find({ userId })
@@ -203,15 +235,22 @@ export class BookingsService {
     };
   }
 
-  async getEventBookings(eventId: string, organizerId: string, page = 1, limit = 10) {
+  async getEventBookings(
+    eventId: string,
+    organizerId: string,
+    page = 1,
+    limit = 10,
+  ) {
     // Verify organizer owns the event
     const event = await this.eventModel.findById(eventId);
     if (!event || event.organizerId.toString() !== organizerId) {
-      throw new BadRequestException('You can only view bookings for your own events');
+      throw new BadRequestException(
+        'You can only view bookings for your own events',
+      );
     }
 
     const skip = (page - 1) * limit;
-    
+
     const [bookings, total] = await Promise.all([
       this.bookingModel
         .find({ eventId, status: BookingStatus.CONFIRMED })
@@ -220,7 +259,10 @@ export class BookingsService {
         .skip(skip)
         .limit(limit)
         .exec(),
-      this.bookingModel.countDocuments({ eventId, status: BookingStatus.CONFIRMED }),
+      this.bookingModel.countDocuments({
+        eventId,
+        status: BookingStatus.CONFIRMED,
+      }),
     ]);
 
     return {
@@ -234,7 +276,11 @@ export class BookingsService {
     };
   }
 
-  private async sendBookingConfirmationEmail(user: any, event: any, booking: Booking) {
+  private async sendBookingConfirmationEmail(
+    user: any,
+    event: any,
+    booking: Booking,
+  ) {
     const subject = 'Booking Confirmed - EventAddis';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -277,7 +323,9 @@ export class BookingsService {
     // Verify organizer owns the event
     const event = await this.eventModel.findById(eventId);
     if (!event || event.organizerId.toString() !== organizerId) {
-      throw new BadRequestException('You can only view stats for your own events');
+      throw new BadRequestException(
+        'You can only view stats for your own events',
+      );
     }
 
     const stats = await this.bookingModel.aggregate([
@@ -287,27 +335,33 @@ export class BookingsService {
           _id: '$status',
           count: { $sum: 1 },
           totalQuantity: { $sum: '$quantity' },
-          totalRevenue: { $sum: '$paymentInfo.amount' }
-        }
-      }
+          totalRevenue: { $sum: '$paymentInfo.amount' },
+        },
+      },
     ]);
 
-    const confirmedBookings = stats.find(s => s._id === BookingStatus.CONFIRMED) || { count: 0, totalQuantity: 0, totalRevenue: 0 };
-    const pendingBookings = stats.find(s => s._id === BookingStatus.PENDING_PAYMENT) || { count: 0, totalQuantity: 0, totalRevenue: 0 };
-    const failedBookings = stats.find(s => s._id === BookingStatus.PAYMENT_FAILED) || { count: 0, totalQuantity: 0, totalRevenue: 0 };
+    const confirmedBookings = stats.find(
+      (s) => s._id === BookingStatus.CONFIRMED,
+    ) || { count: 0, totalQuantity: 0, totalRevenue: 0 };
+    const pendingBookings = stats.find(
+      (s) => s._id === BookingStatus.PENDING_PAYMENT,
+    ) || { count: 0, totalQuantity: 0, totalRevenue: 0 };
+    const failedBookings = stats.find(
+      (s) => s._id === BookingStatus.PAYMENT_FAILED,
+    ) || { count: 0, totalQuantity: 0, totalRevenue: 0 };
 
     return {
       event: {
         title: event.title,
         capacity: event.capacity,
-        price: event.price
+        price: event.price,
       },
       bookings: {
         confirmed: confirmedBookings,
         pending: pendingBookings,
         failed: failedBookings,
-        availableSpots: event.capacity - confirmedBookings.totalQuantity
-      }
+        availableSpots: event.capacity - confirmedBookings.totalQuantity,
+      },
     };
   }
 }
