@@ -1,0 +1,76 @@
+### Test Booking System
+
+### 1. Book Free Event
+POST http://localhost:3001/api/events/EVENT_ID/book
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "quantity": 2
+}
+
+### 2. Book Paid Event (Chapa Payment)
+POST http://localhost:3001/api/events/EVENT_ID/book
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "quantity": 1
+}
+
+### 3. Get User Bookings
+GET http://localhost:3001/api/bookings/user
+Authorization: Bearer YOUR_JWT_TOKEN
+
+### 4. Get User Bookings with Pagination
+GET http://localhost:3001/api/bookings/user?page=1&limit=5
+Authorization: Bearer YOUR_JWT_TOKEN
+
+### 5. Get Event Bookings (Organizer only)
+GET http://localhost:3001/api/events/EVENT_ID/bookings
+Authorization: Bearer ORGANIZER_JWT_TOKEN
+
+### 6. Get Event Bookings with Pagination
+GET http://localhost:3001/api/events/EVENT_ID/bookings?page=1&limit=10
+Authorization: Bearer ORGANIZER_JWT_TOKEN
+
+### 7. Chapa Webhook Callback (Success)
+POST http://localhost:3001/api/payments/chapa/callback?trx_ref=TX_REFERENCE&status=success
+Content-Type: application/json
+
+{
+  "message": "Payment successful"
+}
+
+### 8. Chapa Webhook Callback (Failed)
+POST http://localhost:3001/api/payments/chapa/callback?trx_ref=TX_REFERENCE&status=failed
+Content-Type: application/json
+
+{
+  "message": "Payment failed"
+}
+
+### Test Scenarios:
+
+### Free Event Booking Flow:
+# 1. Create a free event (price: 0)
+# 2. Book the event using endpoint #1
+# 3. Check booking status - should be "confirmed" immediately
+# 4. Check email for confirmation
+
+### Paid Event Booking Flow:
+# 1. Create a paid event (price > 0)
+# 2. Book the event using endpoint #2
+# 3. Get checkout URL in response
+# 4. Simulate payment success via webhook #7
+# 5. Check booking status - should be "confirmed"
+# 6. Check email for confirmation
+
+### Capacity Testing:
+# 1. Create event with capacity: 2
+# 2. Make 2 bookings (should succeed)
+# 3. Try 3rd booking (should fail with capacity error)
+
+### Duplicate Booking Testing:
+# 1. Book an event
+# 2. Try to book same event again (should fail)
