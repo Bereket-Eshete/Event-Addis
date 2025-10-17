@@ -1,0 +1,72 @@
+### Test Authentication Endpoints
+
+### 1. Signup Attendee
+POST http://localhost:3001/auth/signup
+Content-Type: application/json
+
+{
+  "fullName": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "attendee",
+  "termsAccepted": true
+}
+
+### 2. Signup Organizer
+POST http://localhost:3001/auth/signup
+Content-Type: application/json
+
+{
+  "fullName": "Jane Smith",
+  "email": "jane@example.com",
+  "password": "password123",
+  "role": "organizer",
+  "termsAccepted": true,
+  "organizationName": "Event Co",
+  "organizationWebsite": "https://eventco.com",
+  "contactNumber": "+251911123456"
+}
+
+### 3. Login
+POST http://localhost:3001/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### 4. Verify Email (replace TOKEN with actual token from email)
+GET http://localhost:3001/auth/verify-email?token=TOKEN
+
+### 5. Forgot Password
+POST http://localhost:3001/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "john@example.com"
+}
+
+### 6. Reset Password (replace TOKEN with actual token from email)
+POST http://localhost:3001/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "TOKEN",
+  "newPassword": "newpassword123"
+}
+
+### 7. Get Profile (replace JWT_TOKEN with actual token from login)
+GET http://localhost:3001/auth/profile
+Authorization: Bearer JWT_TOKEN
+
+### 8. Admin Only Endpoint (replace JWT_TOKEN with admin token)
+GET http://localhost:3001/auth/admin-only
+Authorization: Bearer JWT_TOKEN
+
+### 9. Organizer/Admin Endpoint (replace JWT_TOKEN with organizer/admin token)
+GET http://localhost:3001/auth/organizer-admin
+Authorization: Bearer JWT_TOKEN
+
+### 10. Google OAuth (open in browser)
+GET http://localhost:3001/auth/google
