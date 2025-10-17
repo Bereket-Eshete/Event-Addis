@@ -67,4 +67,15 @@ export class EmailService {
 
     await this.transporter.sendMail(mailOptions);
   }
+
+  async sendEmail(to: string, subject: string, html: string) {
+    const mailOptions = {
+      from: this.configService.get('EMAIL_USER'),
+      to,
+      subject,
+      html,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
 }
