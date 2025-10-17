@@ -1,4 +1,11 @@
-import { IsOptional, IsString, IsEnum, IsNumber, IsDateString, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  IsDateString,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { EventCategory, EventType } from '../../schemas/event.schema';
 
@@ -10,6 +17,7 @@ export enum SortOption {
   START_DATE = 'start_date',
 }
 
+// query events Dto
 export class QueryEventsDto {
   @IsOptional()
   @IsString()

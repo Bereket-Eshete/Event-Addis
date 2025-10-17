@@ -48,12 +48,12 @@ export function parseEventQuery(query: any): QueryEventsDto {
     parsed.location = query.location.trim();
   }
 
-  // Sort option
+  // Sort option.
   if (query.sort && Object.values(SortOption).includes(query.sort)) {
     parsed.sort = query.sort as SortOption;
   }
 
-  // Pagination
+  // Pagination.
   if (query.page) {
     const page = parseInt(query.page);
     if (!isNaN(page) && page > 0) {
@@ -70,7 +70,7 @@ export function parseEventQuery(query: any): QueryEventsDto {
 
   return parsed;
 }
-
+// a function which checks if a date is valid or not
 function isValidDate(dateString: string): boolean {
   const date = new Date(dateString);
   return date instanceof Date && !isNaN(date.getTime());
