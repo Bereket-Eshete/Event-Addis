@@ -1,0 +1,79 @@
+### Test Events API
+
+### 1. Create Event (Organizer/Admin only)
+POST http://localhost:3001/api/events
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "title": "Tech Conference 2024",
+  "description": "Annual technology conference featuring latest innovations",
+  "category": "technology",
+  "type": "offline",
+  "venue": "Addis Ababa Convention Center",
+  "venueDetails": "Main Hall, 2nd Floor",
+  "location": {
+    "lat": 9.0054,
+    "lng": 38.7636,
+    "address": "Addis Ababa, Ethiopia"
+  },
+  "startAt": "2024-06-15T09:00:00Z",
+  "endAt": "2024-06-15T17:00:00Z",
+  "capacity": 500,
+  "price": 1500,
+  "registrationDeadline": "2024-06-10T23:59:59Z",
+  "status": "published",
+  "tags": ["technology", "innovation", "networking"]
+}
+
+### 2. Get All Events (Public)
+GET http://localhost:3001/api/events
+
+### 3. Get Events with Filters
+GET http://localhost:3001/api/events?q=tech&category=technology&type=offline&minPrice=1000&maxPrice=2000&sort=latest&page=1&limit=5
+
+### 4. Get Events by Location
+GET http://localhost:3001/api/events?location=Addis Ababa
+
+### 5. Get Events by Date Range
+GET http://localhost:3001/api/events?startFrom=2024-06-01&startTo=2024-06-30
+
+### 6. Get Single Event
+GET http://localhost:3001/api/events/EVENT_ID
+
+### 7. Update Event (Owner only)
+PATCH http://localhost:3001/api/events/EVENT_ID
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "title": "Updated Tech Conference 2024",
+  "price": 1200
+}
+
+### 8. Delete Event (Owner only)
+DELETE http://localhost:3001/api/events/EVENT_ID
+Authorization: Bearer YOUR_JWT_TOKEN
+
+### 9. Get My Events (Organizer/Admin only)
+GET http://localhost:3001/api/events/my-events
+Authorization: Bearer YOUR_JWT_TOKEN
+
+### 10. Upload Banner Image
+POST http://localhost:3001/api/uploads
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: multipart/form-data
+
+# Use form-data with key "file" and select an image file
+
+### 11. Sort Events by Price (Ascending)
+GET http://localhost:3001/api/events?sort=price_asc
+
+### 12. Sort Events by Popularity
+GET http://localhost:3001/api/events?sort=popular
+
+### 13. Get Free Events
+GET http://localhost:3001/api/events?maxPrice=0
+
+### 14. Get Online Events
+GET http://localhost:3001/api/events?type=online
