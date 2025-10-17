@@ -15,7 +15,9 @@ import { UploadsModule } from './uploads/uploads.module';
     MongooseModule.forRoot(process.env.DATABASE_URL || '', {
       onConnectionCreate: (connection) => {
         console.log('✅ Successfully connected to MongoDB Atlas!');
-        console.log(`📊 Database: ${connection.db?.databaseName || 'event-addis'}`);
+        console.log(
+          `📊 Database: ${connection.db?.databaseName || 'event-addis'}`,
+        );
         return connection;
       },
     }),
