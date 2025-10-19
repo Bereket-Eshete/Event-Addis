@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 import {
   Calendar,
@@ -10,67 +11,76 @@ import {
   TrendingUp,
   Clock,
   MapPin,
+  Loader,
 } from "lucide-react";
-
-const stats = [
-  {
-    name: "Total Events",
-    value: "12",
-    icon: Calendar,
-    change: "+2 this month",
-  },
-  { name: "Upcoming Events", value: "5", icon: Clock, change: "Next: Dec 15" },
-  {
-    name: "Total Tickets Sold",
-    value: "1,234",
-    icon: Ticket,
-    change: "+15% from last month",
-  },
-  {
-    name: "Total Revenue",
-    value: "45,670 ETB",
-    icon: DollarSign,
-    change: "+12% from last month",
-  },
-];
-
-const recentEvents = [
-  {
-    id: 1,
-    name: "Tech Startup Workshop",
-    date: "Dec 18, 2024",
-    location: "iCog Labs",
-    attendees: 45,
-    revenue: "22,500 ETB",
-    status: "upcoming",
-  },
-  {
-    id: 2,
-    name: "Business Networking Event",
-    date: "Dec 20, 2024",
-    location: "Sheraton Addis",
-    attendees: 89,
-    revenue: "106,800 ETB",
-    status: "upcoming",
-  },
-  {
-    id: 3,
-    name: "Cultural Heritage Exhibition",
-    date: "Nov 28, 2024",
-    location: "National Museum",
-    attendees: 156,
-    revenue: "0 ETB",
-    status: "completed",
-  },
-];
+import { dashboardAPI } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import toast from 'react-hot-toast';
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState({
+    totalEvents: 0,
+    activeEvents: 0,
+    totalBookings: 0,
+    totalRevenue: 0
+  });
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [statsResponse, eventsResponse] = await Promise.all([
+        dashboardAPI.getOrganizerStats(),
+        dashboardAPI.getOrganizerEvents({ limit: 5 })
+      ]);
+      
+      setStats(statsResponse.data);
+      setRecentEvents(eventsResponse.data.events);
+    } catch (error: any) {
+      toast.error('Failed to load dashboard data');
+      console.error('Dashboard error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const statsCards = [
+    {
+      name: "Total Events",
+      value: loading ? "..." : stats.totalEvents.toString(),
+      icon: Calendar,
+      change: "All time",
+    },
+    {
+      name: "Active Events",
+      value: loading ? "..." : stats.activeEvents.toString(),
+      icon: Clock,
+      change: "Currently active"
+    },
+    {
+      name: "Total Bookings",
+      value: loading ? "..." : stats.totalBookings.toString(),
+      icon: Ticket,
+      change: "All events",
+    },
+    {
+      name: "Total Revenue",
+      value: loading ? "..." : `${stats.totalRevenue} ETB`,
+      icon: DollarSign,
+      change: "Total earned",
+    },
+  ];
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
       <div>
         <h1 className="text-3xl font-bold text-primary">
-          Welcome back, Bereket 👋
+          Welcome back, {user?.fullName || 'Organizer'} 👋
         </h1>
         <p className="mt-2 text-muted">
           Here&apos;s what&apos;s happening with your events today.
@@ -79,7 +89,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
+        {statsCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
@@ -109,7 +119,7 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div className="flex flex-col gap-4 sm:flex-row">
         <Link
-          href="/dashboard/events/new"
+          href="/dashboard/events/create"
           className="flex items-center justify-center flex-1 px-6 py-3 space-x-2 rounded-lg btn-primary sm:flex-none"
         >
           <Plus className="w-5 h-5" />
@@ -137,53 +147,62 @@ export default function DashboardPage() {
         </div>
 
         <div className="space-y-4">
-          {recentEvents.map((event) => (
-            <div
-              key={event.id}
-              className="flex items-center justify-between p-4 transition-colors border rounded-lg border-muted hover:bg-surface/50"
-            >
-              <div className="flex-1">
-                <h3 className="font-semibold text-primary">{event.name}</h3>
-                <div className="flex items-center mt-1 space-x-4 text-sm text-muted">
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {event.date}
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    {event.location}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-6 text-sm">
-                <div className="text-center">
-                  <div className="flex items-center text-muted">
-                    <Users className="w-4 h-4 mr-1" />
-                    {event.attendees}
-                  </div>
-                  <div className="text-xs text-muted">attendees</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="font-semibold text-primary">
-                    {event.revenue}
-                  </div>
-                  <div className="text-xs text-muted">revenue</div>
-                </div>
-
-                <div
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    event.status === "upcoming"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {event.status}
-                </div>
-              </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader className="w-6 h-6 animate-spin text-primary" />
+              <span className="ml-2 text-muted">Loading events...</span>
             </div>
-          ))}
+          ) : recentEvents.length === 0 ? (
+            <div className="text-center py-8">
+              <Calendar className="w-12 h-12 mx-auto text-muted mb-4" />
+              <p className="text-muted">No events found. Create your first event!</p>
+              <Link href="/dashboard/events/create" className="btn-primary px-4 py-2 rounded-lg mt-4 inline-block">
+                Create Event
+              </Link>
+            </div>
+          ) : (
+            recentEvents.map((event: any) => (
+              <div
+                key={event._id}
+                className="flex items-center justify-between p-4 transition-colors border rounded-lg border-muted hover:bg-surface/50"
+              >
+                <div className="flex-1">
+                  <h3 className="font-semibold text-primary">{event.title}</h3>
+                  <div className="flex items-center mt-1 space-x-4 text-sm text-muted">
+                    <div className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {new Date(event.startAt).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {event.venue}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-6 text-sm">
+                  <div className="text-center">
+                    <div className="flex items-center text-muted">
+                      <Users className="w-4 h-4 mr-1" />
+                      {event.capacity || 0}
+                    </div>
+                    <div className="text-xs text-muted">capacity</div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="font-semibold text-primary">
+                      {event.price} ETB
+                    </div>
+                    <div className="text-xs text-muted">price</div>
+                  </div>
+
+                  <div className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Active
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -193,33 +212,36 @@ export default function DashboardPage() {
           Upcoming Events Timeline
         </h2>
         <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <div className="w-3 h-3 rounded-full bg-primary"></div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-primary">
-                  Tech Startup Workshop
-                </span>
-                <span className="text-sm text-muted">Dec 18, 2:00 PM</span>
-              </div>
-              <p className="text-sm text-muted">45 registered • iCog Labs</p>
+          {loading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader className="w-5 h-5 animate-spin text-primary" />
+              <span className="ml-2 text-muted">Loading timeline...</span>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="w-3 h-3 rounded-full bg-accent"></div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-primary">
-                  Business Networking Event.
-                </span>
-                <span className="text-sm text-muted">Dec 21, 6:00 PM</span>
-              </div>
-              <p className="text-sm text-muted">
-                89 registered • Sheraton Addis
-              </p>
-            </div>
-          </div>
+          ) : recentEvents.filter((event: any) => new Date(event.startAt) > new Date()).length === 0 ? (
+            <p className="text-center text-muted py-4">No upcoming events scheduled</p>
+          ) : (
+            recentEvents
+              .filter((event: any) => new Date(event.startAt) > new Date())
+              .slice(0, 3)
+              .map((event: any, index: number) => (
+                <div key={event._id} className="flex items-center space-x-4">
+                  <div className={`w-3 h-3 rounded-full ${index === 0 ? 'bg-primary' : 'bg-accent'}`}></div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-primary">
+                        {event.title}
+                      </span>
+                      <span className="text-sm text-muted">
+                        {new Date(event.startAt).toLocaleDateString()}, {new Date(event.startAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted">
+                      {event.capacity} capacity • {event.venue}
+                    </p>
+                  </div>
+                </div>
+              ))
+          )}
         </div>
       </div>
     </div>

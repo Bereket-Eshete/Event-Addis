@@ -3,6 +3,8 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
+import { AuthProvider } from "@/components/providers/AuthProvider";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -34,7 +36,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <LayoutWrapper>{children}</LayoutWrapper>
+          <AuthProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+            <Toaster position="top-right" />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

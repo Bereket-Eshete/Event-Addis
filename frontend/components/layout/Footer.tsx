@@ -56,9 +56,10 @@ export function Footer() {
                   type="email"
                   placeholder="Enter your email"
                   className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  suppressHydrationWarning
                 />
               </div>
-              <button className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg text-white font-medium transition-colors">
+              <button className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg text-white font-medium transition-colors" suppressHydrationWarning>
                 Subscribe
               </button>
             </div>

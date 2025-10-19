@@ -16,7 +16,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button className="w-10 h-10 p-0 flex items-center justify-center hover:bg-surface rounded-lg transition-colors relative cursor-pointer">
+      <button className="w-10 h-10 p-0 flex items-center justify-center hover:bg-surface rounded-lg transition-colors relative cursor-pointer" suppressHydrationWarning>
         <Sun className="h-4 w-4 text-primary" />
       </button>
     )
@@ -28,6 +28,7 @@ export function ThemeToggle() {
     <button
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
       className="w-10 h-10 p-0 flex items-center justify-center hover:bg-surface rounded-lg transition-colors relative cursor-pointer"
+      suppressHydrationWarning
     >
       {isDark ? (
         <Moon className="h-4 w-4 text-primary transition-all" />

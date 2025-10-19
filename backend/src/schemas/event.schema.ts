@@ -17,7 +17,7 @@ export enum EventCategory {
 
 export enum EventType {
   ONLINE = 'online',
-  OFFLINE = 'offline',
+  IN_PERSON = 'in-person',
   HYBRID = 'hybrid',
 }
 

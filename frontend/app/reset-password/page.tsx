@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Eye, EyeOff, Lock, Calendar, CheckCircle, AlertCircle } from 'lucide-react'
+import { authAPI } from '@/lib/api'
+import toast from 'react-hot-toast'
 
 export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -17,6 +19,7 @@ export default function ResetPasswordPage() {
   })
 
   const searchParams = useSearchParams()
+  const router = useRouter()
   const token = searchParams.get('token')
 
   useEffect(() => {
@@ -41,12 +44,19 @@ export default function ResetPasswordPage() {
 
     setIsLoading(true)
     
+    const loadingToast = toast.loading('Resetting password...')
+    
     try {
-      // TODO: Implement reset password API call
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
+      await authAPI.resetPassword({
+        token: token!,
+        newPassword: formData.password
+      })
+      toast.success('Password reset successfully!', { id: loadingToast })
       setIsSubmitted(true)
-    } catch (error) {
-      setError('Failed to reset password. Please try again.')
+      setTimeout(() => router.push('/login'), 2000)
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to reset password'
+      toast.error(errorMessage, { id: loadingToast })
     } finally {
       setIsLoading(false)
     }
@@ -162,7 +172,7 @@ export default function ResetPasswordPage() {
         )}
 
         {/* Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} suppressHydrationWarning>
           <div className="space-y-4">
             {/* New Password */}
             <div>

@@ -55,7 +55,7 @@ export default function DashboardLayout({
                   EventAddis
                 </span>
               </Link>
-              <button onClick={() => setSidebarOpen(false)}>
+              <button onClick={() => setSidebarOpen(false)} suppressHydrationWarning>
                 <X className="w-6 h-6 text-primary" />
               </button>
             </div>
@@ -125,12 +125,13 @@ export default function DashboardLayout({
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 transition-colors rounded-lg lg:hidden hover:bg-surface"
+            suppressHydrationWarning
           >
             <Menu className="w-6 h-6 text-primary" />
           </button>
 
           <div className="flex items-center ml-auto space-x-4">
-            <button className="relative p-2 transition-colors rounded-lg hover:bg-surface">
+            <button className="relative p-2 transition-colors rounded-lg hover:bg-surface" suppressHydrationWarning>
               <Bell className="w-5 h-5 text-primary" />
               <span className="absolute w-3 h-3 bg-red-500 rounded-full -top-1 -right-1"></span>
             </button>
@@ -143,7 +144,7 @@ export default function DashboardLayout({
                 Bereket
               </span>
             </div>
-            <button className="p-2 transition-colors rounded-lg hover:bg-surface">
+            <button className="p-2 transition-colors rounded-lg hover:bg-surface" suppressHydrationWarning>
               <LogOut className="w-5 h-5 text-primary" />
             </button>
           </div>
