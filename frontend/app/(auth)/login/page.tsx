@@ -2,24 +2,61 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, Calendar } from 'lucide-react'
+import { authAPI } from '@/lib/api'
+import { useAuth } from '@/lib/auth'
+import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
+  
+  const router = useRouter()
+  const { setAuth } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement login logic
-    console.log('Login:', formData)
+    setError('')
+    setLoading(true)
+    
+    const loadingToast = toast.loading('Signing you in...')
+    
+    try {
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password
+      })
+      
+      if (response.data.access_token) {
+        setAuth(response.data.user, response.data.access_token)
+        toast.success('Welcome back!', { id: loadingToast })
+        
+        // Role-based routing
+        const redirectPath = response.data.user.role === 'organizer' ? '/dashboard' : '/user'
+        router.push(redirectPath)
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Login failed'
+      
+      if (errorMessage.includes('verify your email')) {
+        toast.error('Please verify your email first', { id: loadingToast })
+        router.push(`/signup-success?email=${encodeURIComponent(formData.email)}`)
+      } else {
+        toast.error(errorMessage, { id: loadingToast })
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleGoogleLogin = () => {
-    // TODO: Implement Google OAuth
-    window.location.href = 'http://localhost:3001/auth/google'
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google?prompt=select_account`
   }
 
   return (
@@ -44,7 +81,7 @@ export default function LoginPage() {
         </div>
 
         {/* Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} suppressHydrationWarning>
           <div className="space-y-4">
             {/* Email */}
             <div>
@@ -126,9 +163,17 @@ export default function LoginPage() {
           {/* Submit button */}
           <button
             type="submit"
-            className="group relative w-full flex justify-center py-3 px-4 btn-primary text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+            disabled={loading}
+            className="group relative w-full flex justify-center py-3 px-4 btn-primary text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50"
           >
-            Sign in
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Signing in...
+              </div>
+            ) : (
+              'Sign in'
+            )}
           </button>
 
           {/* Divider */}

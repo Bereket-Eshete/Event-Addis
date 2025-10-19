@@ -3,22 +3,30 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Mail, ArrowLeft, Calendar, CheckCircle } from 'lucide-react'
+import { authAPI } from '@/lib/api'
+import toast from 'react-hot-toast'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  const [error, setError] = useState('')
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
+    
+    const loadingToast = toast.loading('Sending reset email...')
     
     try {
-      // TODO: Implement forgot password API call
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
+      await authAPI.forgotPassword(email)
+      toast.success('Reset email sent! Check your inbox.', { id: loadingToast })
       setIsSubmitted(true)
-    } catch (error) {
-      console.error('Error:', error)
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to send reset email'
+      toast.error(errorMessage, { id: loadingToast })
     } finally {
       setIsLoading(false)
     }
@@ -95,7 +103,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} suppressHydrationWarning>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Email address
@@ -116,6 +124,12 @@ export default function ForgotPasswordPage() {
               />
             </div>
           </div>
+
+          {error && (
+            <div className="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"

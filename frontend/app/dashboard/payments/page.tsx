@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DollarSign,
   TrendingUp,
@@ -10,76 +10,71 @@ import {
   Building,
   Calendar,
   Filter,
+  Loader,
 } from "lucide-react";
-
-const transactions = [
-  {
-    id: 1,
-    eventName: "Tech Startup Workshop",
-    paymentDate: "2024-12-10",
-    amount: 22500,
-    paymentMethod: "Chapa",
-    status: "completed",
-    attendeeCount: 45,
-    ticketPrice: 500,
-  },
-  {
-    id: 2,
-    eventName: "Business Networking Event",
-    paymentDate: "2024-12-12",
-    amount: 106800,
-    paymentMethod: "Mobile Money",
-    status: "completed",
-    attendeeCount: 89,
-    ticketPrice: 1200,
-  },
-  {
-    id: 3,
-    eventName: "Private Company Meeting",
-    paymentDate: "2024-12-14",
-    amount: 0,
-    paymentMethod: "Free Event",
-    status: "completed",
-    attendeeCount: 25,
-    ticketPrice: 0,
-  },
-  {
-    id: 4,
-    eventName: "Cultural Heritage Exhibition",
-    paymentDate: "2024-12-15",
-    amount: 15000,
-    paymentMethod: "Bank Transfer",
-    status: "pending",
-    attendeeCount: 30,
-    ticketPrice: 500,
-  },
-];
-
-const payoutMethods = [
-  { id: 1, type: "Mobile Money", account: "+251911123456", status: "active" },
-  { id: 2, type: "Bank Account", account: "CBE - ****1234", status: "active" },
-  { id: 3, type: "PayPal", account: "bereket@email.com", status: "pending" },
-];
+import { dashboardAPI } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function PaymentsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
 
-  const filteredTransactions = transactions.filter((transaction) => {
+  // Mock payout methods - in real app, this would come from backend
+  const payoutMethods = [
+    {
+      id: 1,
+      type: "Bank Transfer",
+      account: "**** **** **** 1234",
+      status: "active"
+    },
+    {
+      id: 2,
+      type: "Mobile Money",
+      account: "+251 9** *** 567",
+      status: "active"
+    }
+  ];
+
+  useEffect(() => {
+    fetchPayments();
+  }, [pagination.page]);
+
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      const response = await dashboardAPI.getOrganizerPayments({ 
+        page: pagination.page, 
+        limit: 10 
+      });
+      setPayments(response.data.payments);
+      setPagination({
+        page: response.data.page,
+        pages: response.data.pages,
+        total: response.data.total
+      });
+    } catch (error) {
+      toast.error('Failed to load payments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredTransactions = payments.filter((payment: any) => {
     const matchesStatus =
-      statusFilter === "all" || transaction.status === statusFilter;
-    const matchesMethod =
-      methodFilter === "all" || transaction.paymentMethod === methodFilter;
-    return matchesStatus && matchesMethod;
+      statusFilter === "all" || payment.status === statusFilter;
+    return matchesStatus;
   });
 
-  const totalRevenue = transactions.reduce((sum, t) => sum + t.amount, 0);
-  const pendingPayments = transactions
-    .filter((t) => t.status === "pending")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const completedPayments = transactions
-    .filter((t) => t.status === "completed")
-    .reduce((sum, t) => sum + t.amount, 0);
+  const totalRevenue = payments.reduce((sum: number, t: any) => sum + (t.totalAmount || 0), 0);
+  const pendingPayments = payments
+    .filter((t: any) => t.status === "pending")
+    .reduce((sum: number, t: any) => sum + (t.totalAmount || 0), 0);
+  const completedPayments = payments
+    .filter((t: any) => t.status === "confirmed")
+    .reduce((sum: number, t: any) => sum + (t.totalAmount || 0), 0);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -244,86 +239,80 @@ export default function PaymentsPage() {
 
       {/* Transactions Table */}
       <div className="overflow-hidden card">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b bg-surface border-muted">
-              <tr>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Event
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Date
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Amount
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Method
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Status
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Details
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTransactions.map((transaction) => (
-                <tr
-                  key={transaction.id}
-                  className="border-b border-muted hover:bg-surface/50"
-                >
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-primary">
-                      {transaction.eventName}
-                    </div>
-                    <div className="text-sm text-muted">
-                      {transaction.attendeeCount} attendees
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-primary">
-                      {new Date(transaction.paymentDate).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-primary">
-                      {transaction.amount.toLocaleString()} ETB
-                    </div>
-                    {transaction.ticketPrice > 0 && (
-                      <div className="text-sm text-muted">
-                        {transaction.ticketPrice} ETB per ticket
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      {getPaymentIcon(transaction.paymentMethod)}
-                      <span className="text-primary">
-                        {transaction.paymentMethod}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                        transaction.status
-                      )}`}
-                    >
-                      {transaction.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="text-sm font-medium text-accent hover:text-primary">
-                      View Receipt
-                    </button>
-                  </td>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted">Loading payments...</span>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b bg-surface border-muted">
+                <tr>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Event
+                  </th>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    User
+                  </th>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Amount
+                  </th>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Date
+                  </th>
                 </tr>
+              </thead>
+              <tbody>
+                {filteredTransactions.map((payment: any) => (
+                  <tr
+                    key={payment._id}
+                    className="border-b border-muted hover:bg-surface/50"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-primary">
+                        {payment.event?.title || 'Unknown Event'}
+                      </div>
+                      <div className="text-sm text-muted">
+                        {payment.event?.location || 'No location'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-primary">
+                        {payment.user?.fullName || 'Unknown User'}
+                      </div>
+                      <div className="text-sm text-muted">
+                        {payment.user?.email || 'No email'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-semibold text-primary">
+                        {payment.totalAmount || 0} ETB
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                          payment.status
+                        )}`}
+                      >
+                        {payment.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-primary">
+                        {new Date(payment.createdAt).toLocaleDateString()}
+                      </div>
+                    </td>
+                  </tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

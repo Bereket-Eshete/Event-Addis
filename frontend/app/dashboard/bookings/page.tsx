@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Download,
@@ -9,84 +9,56 @@ import {
   Users,
   Mail,
   Phone,
+  Loader,
 } from "lucide-react";
-
-const bookings = [
-  {
-    id: 1,
-    eventName: "Tech Startup Workshop",
-    attendeeName: "Meron Tadesse",
-    email: "meron12@email.com",
-    phone: "+251911123456",
-    ticketType: "Regular",
-    paymentStatus: "paid",
-    checkInStatus: "checked-in",
-    bookingDate: "2024-12-10",
-    amount: 500,
-  },
-  {
-    id: 2,
-    eventName: "Tech Startup Workshop",
-    attendeeName: "Daniel Bekele",
-    email: "daniel.bekele@email.com",
-    phone: "+251922234567",
-    ticketType: "VIP",
-    paymentStatus: "paid",
-    checkInStatus: "pending",
-    bookingDate: "2024-12-12",
-    amount: 800,
-  },
-  {
-    id: 3,
-    eventName: "Business Networking Event",
-    attendeeName: "Sara Mohammed",
-    email: "sara.mohammed@email.com",
-    phone: "+251933345678",
-    ticketType: "Regular",
-    paymentStatus: "pending",
-    checkInStatus: "pending",
-    bookingDate: "2024-12-14",
-    amount: 1200,
-  },
-  {
-    id: 4,
-    eventName: "Cultural Heritage Exhibition",
-    attendeeName: "Yohannes Alemu",
-    email: "yohannesalemu@email.com",
-    phone: "+251944456789",
-    ticketType: "Free",
-    paymentStatus: "free",
-    checkInStatus: "checked-in",
-    bookingDate: "2024-11-25",
-    amount: 0,
-  },
-];
-
-const events = [
-  "All Events",
-  "Tech Startup Workshop",
-  "Business Networking Event",
-  "Cultural Heritage Exhibition",
-];
+import { dashboardAPI } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function BookingsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEvent, setSelectedEvent] = useState("All Events");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [checkInFilter, setCheckInFilter] = useState("all");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
 
-  const filteredBookings = bookings.filter((booking) => {
+  useEffect(() => {
+    fetchBookings();
+  }, [pagination.page]);
+
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const response = await dashboardAPI.getOrganizerBookings({ 
+        page: pagination.page, 
+        limit: 10 
+      });
+      setBookings(response.data.bookings);
+      setPagination({
+        page: response.data.page,
+        pages: response.data.pages,
+        total: response.data.total
+      });
+    } catch (error) {
+      toast.error('Failed to load bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get unique events from bookings
+  const uniqueEvents = Array.from(
+    new Set(bookings.map((booking: any) => booking.event?.title).filter(Boolean))
+  );
+  const events = ['All Events', ...uniqueEvents];
+
+  const filteredBookings = bookings.filter((booking: any) => {
     const matchesSearch =
-      booking.attendeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesEvent =
-      selectedEvent === "All Events" || booking.eventName === selectedEvent;
-    const matchesPayment =
-      paymentFilter === "all" || booking.paymentStatus === paymentFilter;
-    const matchesCheckIn =
-      checkInFilter === "all" || booking.checkInStatus === checkInFilter;
-
-    return matchesSearch && matchesEvent && matchesPayment && matchesCheckIn;
+      booking.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesEvent = selectedEvent === 'All Events' || booking.event?.title === selectedEvent;
+    return matchesSearch && matchesEvent;
   });
 
   const getPaymentStatusColor = (status: string) => {
@@ -218,6 +190,7 @@ export default function BookingsPage() {
               className="w-full py-2 pl-10 pr-4 border rounded-lg border-muted bg-surface text-primary focus:outline-none focus:ring-2 focus:ring-primary"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              suppressHydrationWarning
             />
           </div>
 
@@ -226,6 +199,7 @@ export default function BookingsPage() {
             className="px-4 py-2 border rounded-lg border-muted bg-surface text-primary focus:outline-none focus:ring-2 focus:ring-primary"
             value={selectedEvent}
             onChange={(e) => setSelectedEvent(e.target.value)}
+            suppressHydrationWarning
           >
             {events.map((event) => (
               <option key={event} value={event}>
@@ -239,6 +213,7 @@ export default function BookingsPage() {
             className="px-4 py-2 border rounded-lg border-muted bg-surface text-primary focus:outline-none focus:ring-2 focus:ring-primary"
             value={paymentFilter}
             onChange={(e) => setPaymentFilter(e.target.value)}
+            suppressHydrationWarning
           >
             <option value="all">All Payments</option>
             <option value="paid">Paid</option>
@@ -251,6 +226,7 @@ export default function BookingsPage() {
             className="px-4 py-2 border rounded-lg border-muted bg-surface text-primary focus:outline-none focus:ring-2 focus:ring-primary"
             value={checkInFilter}
             onChange={(e) => setCheckInFilter(e.target.value)}
+            suppressHydrationWarning
           >
             <option value="all">All Status</option>
             <option value="checked-in">Checked In</option>
@@ -261,106 +237,83 @@ export default function BookingsPage() {
 
       {/* Bookings Table */}
       <div className="overflow-hidden card">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b bg-surface border-muted">
-              <tr>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Attendee
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Event
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Ticket Type
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Payment
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Check-in
-                </th>
-                <th className="px-6 py-4 font-medium text-left text-primary">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBookings.map((booking) => (
-                <tr
-                  key={booking.id}
-                  className="border-b border-muted hover:bg-surface/50"
-                >
-                  <td className="px-6 py-4">
-                    <div>
-                      <div className="font-medium text-primary">
-                        {booking.attendeeName}
-                      </div>
-                      <div className="flex items-center mt-1 text-sm text-muted">
-                        <Mail className="w-3 h-3 mr-1" />
-                        {booking.email}
-                      </div>
-                      <div className="flex items-center text-sm text-muted">
-                        <Phone className="w-3 h-3 mr-1" />
-                        {booking.phone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-primary">
-                      {booking.eventName}
-                    </div>
-                    <div className="text-sm text-muted">
-                      Booked:{" "}
-                      {new Date(booking.bookingDate).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="font-medium text-primary">
-                      {booking.ticketType}
-                    </span>
-                    {booking.amount > 0 && (
-                      <div className="text-sm text-muted">
-                        {booking.amount} ETB
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(
-                        booking.paymentStatus
-                      )}`}
-                    >
-                      {booking.paymentStatus}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getCheckInStatusColor(
-                        booking.checkInStatus
-                      )}`}
-                    >
-                      {booking.checkInStatus === "checked-in"
-                        ? "Checked In"
-                        : "Pending"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {booking.checkInStatus === "pending" && (
-                      <button
-                        onClick={() => handleCheckIn(booking.id)}
-                        className="flex items-center px-3 py-1 space-x-1 text-sm rounded-lg btn-primary"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        <span>Check In</span>
-                      </button>
-                    )}
-                  </td>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted">Loading bookings...</span>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b bg-surface border-muted">
+                <tr>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Attendee
+                  </th>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Event
+                  </th>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Amount
+                  </th>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 font-medium text-left text-primary">
+                    Date
+                  </th>
                 </tr>
+              </thead>
+              <tbody>
+                {filteredBookings.map((booking: any) => (
+                  <tr
+                    key={booking._id}
+                    className="border-b border-muted hover:bg-surface/50"
+                  >
+                    <td className="px-6 py-4">
+                      <div>
+                        <div className="font-medium text-primary">
+                          {booking.user?.fullName || 'Unknown User'}
+                        </div>
+                        <div className="flex items-center mt-1 text-sm text-muted">
+                          <Mail className="w-3 h-3 mr-1" />
+                          {booking.user?.email || 'No email'}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-primary">
+                        {booking.event?.title || 'Unknown Event'}
+                      </div>
+                      <div className="text-sm text-muted">
+                        {booking.event?.location || 'No location'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="font-medium text-primary">
+                        {booking.totalAmount || 0} ETB
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(
+                          booking.status
+                        )}`}
+                      >
+                        {booking.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-muted">
+                        {new Date(booking.createdAt).toLocaleDateString()}
+                      </div>
+                    </td>
+                  </tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {filteredBookings.length === 0 && (

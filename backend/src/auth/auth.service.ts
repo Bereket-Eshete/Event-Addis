@@ -47,9 +47,14 @@ export class AuthService {
     });
 
     await user.save();
-    await this.emailService.sendVerificationEmail(email, emailVerificationToken);
-
-    return { message: 'User registered successfully. Please check your email to verify your account.' };
+    
+    try {
+      await this.emailService.sendVerificationEmail(email, emailVerificationToken);
+      return { message: 'User registered successfully. Please check your email to verify your account.' };
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      return { message: 'User registered successfully. Email verification temporarily unavailable - you can still log in.' };
+    }
   }
 
   async login(loginDto: LoginDto) {
@@ -146,20 +151,20 @@ export class AuthService {
     return { message: 'Password reset successfully' };
   }
 
-  async googleLogin(profile: any) {
-    let user = await this.userModel.findOne({ googleId: profile.id });
+  async googleLogin(googleUser: any) {
+    let user = await this.userModel.findOne({ googleId: googleUser.id });
 
     if (!user) {
-      user = await this.userModel.findOne({ email: profile.emails[0].value });
+      user = await this.userModel.findOne({ email: googleUser.email });
       
       if (user) {
-        user.googleId = profile.id;
+        user.googleId = googleUser.id;
         await user.save();
       } else {
         user = new this.userModel({
-          fullName: profile.displayName,
-          email: profile.emails[0].value,
-          googleId: profile.id,
+          fullName: googleUser.displayName,
+          email: googleUser.email,
+          googleId: googleUser.id,
           role: UserRole.ATTENDEE,
           isEmailVerified: true,
           status: UserStatus.ACTIVE,
@@ -203,6 +208,52 @@ export class AuthService {
       profilePicture: user.profilePicture,
       createdAt: (user as any).createdAt,
       updatedAt: (user as any).updatedAt,
+    };
+  }
+
+  async updateProfile(userId: string, updateData: any) {
+    const user = await this.userModel.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Only allow updating specific fields
+    const allowedFields = ['fullName', 'contactNumber', 'organizationName', 'organizationWebsite'];
+    const updateFields = {};
+    
+    for (const field of allowedFields) {
+      if (updateData[field] !== undefined) {
+        updateFields[field] = updateData[field];
+      }
+    }
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      updateFields,
+      { new: true }
+    ).select('-password -emailVerificationToken -passwordResetToken');
+
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser._id,
+        fullName: updatedUser.fullName,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        status: updatedUser.status,
+        isEmailVerified: updatedUser.isEmailVerified,
+        organizationName: updatedUser.organizationName,
+        organizationWebsite: updatedUser.organizationWebsite,
+        contactNumber: updatedUser.contactNumber,
+        profilePicture: updatedUser.profilePicture,
+        createdAt: (updatedUser as any).createdAt,
+        updatedAt: (updatedUser as any).updatedAt,
+      }
     };
   }
 }

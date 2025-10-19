@@ -1,8 +1,11 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User, Building, Phone, Globe, Calendar } from 'lucide-react'
+import { authAPI } from '@/lib/api'
+import toast from 'react-hot-toast'
 
 type UserRole = 'attendee' | 'organizer'
 
@@ -13,22 +16,88 @@ export default function SignupPage() {
     fullName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     role: 'attendee' as UserRole,
     termsAccepted: false,
     organizationName: '',
     organizationWebsite: '',
     contactNumber: ''
   })
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  useEffect(() => {
+    // Test backend connection
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/profile`)
+      .then(() => console.log('Backend connected'))
+      .catch(() => console.log('Backend connection failed - make sure backend is running on port 3001'))
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement signup logic
-    console.log('Signup:', formData)
+    setError('')
+    
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+    
+    if (formData.password.length < 8) {
+      toast.error('Password must be at least 8 characters long')
+      return
+    }
+    
+    if (!formData.termsAccepted) {
+      toast.error('Please accept the terms and conditions')
+      return
+    }
+    
+    setLoading(true)
+    const loadingToast = toast.loading('Creating your account...')
+    
+    try {
+      console.log('Submitting registration data:', {
+        fullName: formData.fullName,
+        email: formData.email,
+        role: formData.role,
+        organizationName: formData.organizationName,
+        organizationWebsite: formData.organizationWebsite,
+        contactNumber: formData.contactNumber
+      })
+      
+      const response = await authAPI.register({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        termsAccepted: formData.termsAccepted,
+        organizationName: formData.organizationName,
+        organizationWebsite: formData.organizationWebsite,
+        contactNumber: formData.contactNumber
+      })
+      
+      console.log('Registration response:', response)
+      toast.success('Account created successfully! Check your email for verification.', { id: loadingToast })
+      
+      // Small delay to ensure toast is shown before redirect
+      setTimeout(() => {
+        router.push(`/signup-success?email=${encodeURIComponent(formData.email)}`)
+      }, 1000)
+    } catch (err: any) {
+      console.error('Registration error:', err)
+      console.error('Error response:', err.response)
+      const errorMessage = err.response?.data?.message || err.message || 'Registration failed'
+      toast.error(errorMessage, { id: loadingToast })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleGoogleSignup = () => {
-    // TODO: Implement Google OAuth
-    window.location.href = 'http://localhost:3001/auth/google'
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google?prompt=select_account`
   }
 
   return (
@@ -67,6 +136,7 @@ export default function SignupPage() {
                   ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                   : 'border-gray-300 dark:border-gray-600 hover:border-purple-300'
               }`}
+              suppressHydrationWarning
             >
               <User className="h-8 w-8 mx-auto mb-2 text-purple-600" />
               <div className="font-medium text-gray-900 dark:text-white">Attend Events</div>
@@ -83,6 +153,7 @@ export default function SignupPage() {
                   ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                   : 'border-gray-300 dark:border-gray-600 hover:border-purple-300'
               }`}
+              suppressHydrationWarning
             >
               <Building className="h-8 w-8 mx-auto mb-2 text-purple-600" />
               <div className="font-medium text-gray-900 dark:text-white">Organize Events</div>
@@ -92,7 +163,7 @@ export default function SignupPage() {
         </div>
 
         {/* Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} suppressHydrationWarning>
           <div className="space-y-4">
             {/* Full Name */}
             <div>
@@ -163,6 +234,39 @@ export default function SignupPage() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                   ) : (
                     <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -263,9 +367,17 @@ export default function SignupPage() {
           {/* Submit button */}
           <button
             type="submit"
-            className="group relative w-full flex justify-center py-3 px-4 btn-primary text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+            disabled={loading}
+            className="group relative w-full flex justify-center py-3 px-4 btn-primary text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50"
           >
-            Create Account
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Creating Account...
+              </div>
+            ) : (
+              'Create Account'
+            )}
           </button>
 
           {/* Divider */}

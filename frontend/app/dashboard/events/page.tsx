@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -13,77 +13,73 @@ import {
   MapPin,
   Users,
   DollarSign,
+  Loader,
 } from "lucide-react";
-
-const events = [
-  {
-    id: 1,
-    name: "Tech Startup Workshop",
-    date: "2024-12-18",
-    time: "14:00",
-    location: "iCog Labs",
-    status: "upcoming",
-    visibility: "public",
-    ticketsSold: 45,
-    totalTickets: 100,
-    revenue: 22500,
-    category: "Workshop",
-  },
-  {
-    id: 2,
-    name: "Business Networking Event",
-    date: "2024-12-20",
-    time: "18:00",
-    location: "Sheraton Addis",
-    status: "upcoming",
-    visibility: "public",
-    ticketsSold: 89,
-    totalTickets: 150,
-    revenue: 106800,
-    category: "Business",
-  },
-  {
-    id: 3,
-    name: "Cultural Heritage Exhibition",
-    date: "2024-11-28",
-    time: "10:00",
-    location: "National Museum",
-    status: "completed",
-    visibility: "public",
-    ticketsSold: 156,
-    totalTickets: 200,
-    revenue: 0,
-    category: "Culture",
-  },
-  {
-    id: 4,
-    name: "Private Company Meeting",
-    date: "2024-12-25",
-    time: "09:00",
-    location: "Office Conference Room",
-    status: "upcoming",
-    visibility: "private",
-    ticketsSold: 25,
-    totalTickets: 30,
-    revenue: 0,
-    category: "Meeting",
-  },
-];
+import { dashboardAPI, eventsAPI } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { DeleteModal } from '@/components/ui/DeleteModal';
 
 export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [visibilityFilter, setVisibilityFilter] = useState("all");
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, eventId: '', eventTitle: '' });
+  const [deleting, setDeleting] = useState(false);
 
-  const filteredEvents = events.filter((event) => {
-    const matchesSearch = event.name
+  useEffect(() => {
+    fetchEvents();
+  }, [statusFilter, pagination.page]);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const params: any = { page: pagination.page, limit: 10 };
+      if (statusFilter !== 'all') params.status = statusFilter;
+      
+      const response = await dashboardAPI.getOrganizerEvents(params);
+      setEvents(response.data.events);
+      setPagination({
+        page: response.data.page,
+        pages: response.data.pages,
+        total: response.data.total
+      });
+    } catch (error) {
+      toast.error('Failed to load events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openDeleteModal = (eventId: string, eventTitle: string) => {
+    setDeleteModal({ isOpen: true, eventId, eventTitle });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, eventId: '', eventTitle: '' });
+  };
+
+  const handleDeleteEvent = async () => {
+    try {
+      setDeleting(true);
+      await eventsAPI.deleteEvent(deleteModal.eventId);
+      toast.success('Event deleted successfully');
+      closeDeleteModal();
+      fetchEvents();
+    } catch (error) {
+      toast.error('Failed to delete event');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const filteredEvents = events.filter((event: any) => {
+    const matchesSearch = event.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || event.status === statusFilter;
-    const matchesVisibility =
-      visibilityFilter === "all" || event.visibility === visibilityFilter;
-    return matchesSearch && matchesStatus && matchesVisibility;
+    return matchesSearch;
   });
 
   const getStatusColor = (status: string) => {
@@ -108,7 +104,7 @@ export default function EventsPage() {
           <p className="mt-1 text-muted">Create and manage your events</p>
         </div>
         <Link
-          href="/dashboard/events/new"
+          href="/dashboard/events/create"
           className="flex items-center px-4 py-2 mt-4 space-x-2 rounded-lg btn-primary sm:mt-0"
         >
           <Plus className="w-5 h-5" />
@@ -158,34 +154,26 @@ export default function EventsPage() {
 
       {/* Events Grid */}
       <div className="grid gap-6">
-        {filteredEvents.map((event) => (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted">Loading events...</span>
+          </div>
+        ) : filteredEvents.map((event: any) => (
           <div
-            key={event.id}
+            key={event._id}
             className="p-6 transition-shadow card hover:shadow-lg"
           >
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center justify-between">
               {/* Event Info */}
               <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-semibold text-primary">
-                    {event.name}
+                    {event.title}
                   </h3>
                   <div className="flex items-center space-x-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                        event.status
-                      )}`}
-                    >
-                      {event.status}
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        event.visibility === "public"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {event.visibility}
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+                      {event.category || 'Event'}
                     </span>
                   </div>
                 </div>
@@ -194,56 +182,40 @@ export default function EventsPage() {
                   <div className="flex items-center text-muted">
                     <Calendar className="w-4 h-4 mr-2" />
                     <span>
-                      {new Date(event.date).toLocaleDateString()} at{" "}
-                      {event.time}
+                      {new Date(event.startAt).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex items-center text-muted">
                     <MapPin className="w-4 h-4 mr-2" />
-                    <span>{event.location}</span>
+                    <span>{event.venue}</span>
                   </div>
                   <div className="flex items-center text-muted">
                     <Users className="w-4 h-4 mr-2" />
                     <span>
-                      {event.ticketsSold}/{event.totalTickets} tickets
+                      {event.capacity || 0} capacity
                     </span>
                   </div>
                   <div className="flex items-center text-muted">
                     <DollarSign className="w-4 h-4 mr-2" />
-                    <span>{event.revenue.toLocaleString()} ETB.</span>
+                    <span>{event.price || 0} ETB</span>
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center mt-4 space-x-2 lg:mt-0 lg:ml-6">
-                <button className="p-2 transition-colors rounded-lg text-primary hover:bg-surface">
+              <div className="flex items-center space-x-2 ml-6">
+                <Link href={`/dashboard/events/${event._id}`} className="p-2 transition-colors rounded-lg text-primary hover:bg-surface">
                   <Eye className="w-5 h-5" />
-                </button>
-                <button className="p-2 transition-colors rounded-lg text-primary hover:bg-surface">
+                </Link>
+                <Link href={`/dashboard/events/${event._id}/edit`} className="p-2 transition-colors rounded-lg text-primary hover:bg-surface">
                   <Edit className="w-5 h-5" />
-                </button>
-                <button className="p-2 text-red-600 transition-colors rounded-lg hover:bg-red-50">
+                </Link>
+                <button 
+                  onClick={() => openDeleteModal(event._id, event.title)}
+                  className="p-2 text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                >
                   <Trash2 className="w-5 h-5" />
                 </button>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-1 text-sm text-muted">
-                <span>Ticket Sales Progress</span>
-                <span>
-                  {Math.round((event.ticketsSold / event.totalTickets) * 100)}%
-                </span>
-              </div>
-              <div className="w-full h-2 bg-gray-200 rounded-full">
-                <div
-                  className="h-2 transition-all duration-300 rounded-full bg-primary"
-                  style={{
-                    width: `${(event.ticketsSold / event.totalTickets) * 100}%`,
-                  }}
-                ></div>
               </div>
             </div>
           </div>
@@ -260,7 +232,7 @@ export default function EventsPage() {
             Try adjusting your search or filters
           </p>
           <Link
-            href="/dashboard/events/new"
+            href="/dashboard/events/create"
             className="inline-flex items-center px-4 py-2 space-x-2 rounded-lg btn-primary"
           >
             <Plus className="w-5 h-5" />
@@ -268,6 +240,15 @@ export default function EventsPage() {
           </Link>
         </div>
       )}
+
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteEvent}
+        title="Delete Event"
+        message={`Are you sure you want to delete "${deleteModal.eventTitle}"? This action cannot be undone and will remove all associated bookings.`}
+        loading={deleting}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Get, Put, Body, Query, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
@@ -7,6 +7,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from '../schemas/user.schema';
 
@@ -16,7 +17,15 @@ export class AuthController {
 
   @Post('signup')
   async signup(@Body() signupDto: SignupDto) {
-    return this.authService.signup(signupDto);
+    try {
+      console.log('Signup request received:', signupDto);
+      const result = await this.authService.signup(signupDto);
+      console.log('Signup successful:', result);
+      return result;
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
   }
 
   @Post('login')
@@ -40,21 +49,33 @@ export class AuthController {
   }
 
   @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-    // Initiates Google OAuth flow
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth(@Req() req, @Res() res, @Query('prompt') prompt?: string) {
+    // The guard will handle the redirect to Google
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(@Req() req) {
-    return this.authService.googleLogin(req.user);
+  async googleAuthCallback(@Req() req, @Res() res) {
+    try {
+      const result = await this.authService.googleLogin(req.user);
+      const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?token=${result.access_token}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+      res.redirect(redirectUrl);
+    } catch (error) {
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=google_auth_failed`);
+    }
   }
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req) {
     return this.authService.getProfile(req.user.userId);
+  }
+
+  @Put('profile')
+  @UseGuards(JwtAuthGuard)
+  async updateProfile(@Req() req, @Body() updateData: any) {
+    return this.authService.updateProfile(req.user.userId, updateData);
   }
 
   @Get('admin-only')
