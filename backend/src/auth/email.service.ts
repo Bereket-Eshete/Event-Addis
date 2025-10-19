@@ -47,7 +47,7 @@ export class EmailService {
     const mailOptions = {
       from: this.configService.get('EMAIL_USER'),
       to: email,
-      subject: 'EventAddis - Password Reset',
+      subject: 'EventAddis -- Password Reset',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Password Reset Request</h2>
