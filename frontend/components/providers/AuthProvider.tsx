@@ -7,6 +7,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { validateAuth, token, isAuthenticated } = useAuth();
 
   useEffect(() => {
+    // Always validate on mount to check if user is logged in
+    validateAuth();
+  }, [validateAuth]);
+
+  useEffect(() => {
     if (token) {
       validateAuth();
     }
