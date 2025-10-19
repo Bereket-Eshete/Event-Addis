@@ -36,13 +36,13 @@ const testimonials = [
 
 export function TestimonialsSection() {
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
+    <section className="py-24" style={{background: 'color-mix(in srgb, var(--bg) 98%, var(--accent) 2%)'}}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+          <h2 className="text-3xl lg:text-5xl font-bold text-primary mb-6">
             What Our Community Says
           </h2>
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
+          <p className="text-xl text-muted max-w-3xl mx-auto">
             Join thousands of event enthusiasts and organizers who trust EventAddis to connect them with amazing experiences in Addis Ababa.
           </p>
         </div>
@@ -51,7 +51,7 @@ export function TestimonialsSection() {
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className={`relative bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200 dark:border-slate-700`}
+              className="relative card rounded-2xl p-8 hover:shadow-2xl transition-all duration-300"
             >
               {/* Quote Icon */}
               <div className={`absolute -top-4 left-8 w-8 h-8 bg-gradient-to-br ${testimonial.gradient} rounded-full flex items-center justify-center shadow-lg`}>
@@ -67,7 +67,7 @@ export function TestimonialsSection() {
                 </div>
 
                 {/* Testimonial Text */}
-                <blockquote className="text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
+                <blockquote className="text-primary leading-relaxed text-lg">
                   "{testimonial.text}"
                 </blockquote>
 
@@ -79,10 +79,10 @@ export function TestimonialsSection() {
                     </span>
                   </div>
                   <div>
-                    <div className="font-semibold text-slate-900 dark:text-white">
+                    <div className="font-semibold text-primary">
                       {testimonial.name}
                     </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
+                    <div className="text-sm text-muted">
                       {testimonial.role} at {testimonial.company}
                     </div>
                   </div>
@@ -100,19 +100,19 @@ export function TestimonialsSection() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="space-y-2">
               <div className="text-3xl font-bold text-purple-600">10K+</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Happy Users</div>
+              <div className="text-sm text-muted">Happy Users</div>
             </div>
             <div className="space-y-2">
               <div className="text-3xl font-bold text-emerald-600">500+</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Events Hosted</div>
+              <div className="text-sm text-muted">Events Hosted</div>
             </div>
             <div className="space-y-2">
               <div className="text-3xl font-bold text-amber-600">200+</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Organizers</div>
+              <div className="text-sm text-muted">Organizers</div>
             </div>
             <div className="space-y-2">
               <div className="text-3xl font-bold text-pink-600">4.9★</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">User Rating</div>
+              <div className="text-sm text-muted">User Rating</div>
             </div>
           </div>
         </div>

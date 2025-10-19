@@ -30,13 +30,13 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
+    <section className="py-24" style={{background: 'color-mix(in srgb, var(--bg) 98%, var(--primary) 2%)'}}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+          <h2 className="text-3xl lg:text-5xl font-bold text-primary mb-6">
             How EventAddis Works
           </h2>
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
+          <p className="text-xl text-muted max-w-3xl mx-auto">
             Getting started is simple. Follow these three easy steps to discover and attend amazing events in Addis Ababa.
           </p>
         </div>
@@ -55,7 +55,7 @@ export function HowItWorksSection() {
                 </div>
 
                 {/* Content Card */}
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700">
+                <div className="card rounded-2xl p-8 hover:shadow-xl transition-all duration-300">
                   {/* Image */}
                   <div className="relative h-48 rounded-xl overflow-hidden mb-6">
                     <Image
@@ -74,10 +74,10 @@ export function HowItWorksSection() {
 
                   {/* Text Content */}
                   <div className="space-y-4">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                    <h3 className="text-xl font-bold text-primary">
                       {step.title}
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p className="text-muted leading-relaxed">
                       {step.description}
                     </p>
                   </div>

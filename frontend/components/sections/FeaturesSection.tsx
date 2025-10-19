@@ -44,10 +44,10 @@ export function FeaturesSection() {
     <section className="py-24 bg-muted/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+          <h2 className="text-3xl lg:text-5xl font-bold text-primary mb-6">
             Why Choose EventAddis?
           </h2>
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
+          <p className="text-xl text-muted max-w-3xl mx-auto">
             We're revolutionizing how events are discovered, attended, and managed in Addis Ababa with cutting-edge technology and local expertise.
           </p>
         </div>
@@ -58,18 +58,18 @@ export function FeaturesSection() {
             return (
               <div
                 key={index}
-                className="group relative bg-card rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border hover:border-purple-200 dark:hover:border-purple-700"
+                className="group relative card rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:border-primary/30"
               >
                 <div className="space-y-6">
                   <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                     <Icon className="w-7 h-7 text-white" />
                   </div>
                   
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-bold text-primary">
                     {feature.title}
                   </h3>
                   
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-muted leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
