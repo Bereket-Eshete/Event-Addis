@@ -1,26 +1,46 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Heart, Calendar, MapPin, Clock, Users } from "lucide-react";
+import { dashboardAPI } from "@/lib/api";
+import { toast } from "react-hot-toast";
 
 export default function FavoritesPage() {
-  const favoriteEvents = [
-    {
-      id: 1,
-      title: "Tech Conference 2024",
-      date: "Dec 15, 2024",
-      time: "9:00 AM",
-      location: "Addis Ababa Convention Center",
-      price: 2500,
-      attendees: 150,
-    },
-    {
-      id: 2,
-      title: "Art Exhibition Opening",
-      date: "Dec 18, 2024",
-      time: "6:00 PM",
-      location: "National Museum",
-      price: 500,
-      attendees: 80,
-    },
-  ];
+  const [favoriteEvents, setFavoriteEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
+  const fetchFavorites = async () => {
+    try {
+      const response = await dashboardAPI.getUserFavorites();
+      setFavoriteEvents(response.data.favorites || []);
+    } catch (error) {
+      toast.error('Failed to fetch favorites');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeFromFavorites = async (eventId) => {
+    try {
+      await dashboardAPI.removeFromFavorites(eventId);
+      setFavoriteEvents(prev => prev.filter(event => event._id !== eventId));
+      toast.success('Removed from favorites');
+    } catch (error) {
+      toast.error('Failed to remove from favorites');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -34,12 +54,15 @@ export default function FavoritesPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {favoriteEvents.map((event) => (
           <div
-            key={event.id}
+            key={event._id}
             className="overflow-hidden transition-shadow border rounded-lg bg-surface border-muted hover:shadow-lg"
           >
             <div className="relative">
               <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/20"></div>
-              <button className="absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full top-3 right-3 bg-white/90 hover:bg-white">
+              <button 
+                onClick={() => removeFromFavorites(event._id)}
+                className="absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full top-3 right-3 bg-white/90 hover:bg-white"
+              >
                 <Heart className="w-4 h-4 text-red-500 fill-current" />
               </button>
             </div>
@@ -50,19 +73,19 @@ export default function FavoritesPage() {
               <div className="mb-4 space-y-2 text-sm text-muted">
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" />
-                  <span>{event.date}</span>
+                  <span>{new Date(event.startAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Clock className="w-4 h-4" />
-                  <span>{event.time}</span>
+                  <span>{new Date(event.startAt).toLocaleTimeString()}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <MapPin className="w-4 h-4" />
-                  <span>{event.location}</span>
+                  <span>{event.venue}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
-                  <span>{event.attendees} attending</span>
+                  <span>{event.capacity} capacity</span>
                 </div>
               </div>
 
@@ -78,6 +101,17 @@ export default function FavoritesPage() {
           </div>
         ))}
       </div>
+
+      {favoriteEvents.length === 0 && (
+        <div className="py-12 text-center">
+          <h3 className="mb-2 text-lg font-medium text-primary">
+            No favorite events
+          </h3>
+          <p className="text-muted">
+            You haven't added any events to your favorites yet.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

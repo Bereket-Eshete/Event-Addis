@@ -1,28 +1,36 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Calendar, MapPin, Clock, Download } from "lucide-react";
+import { dashboardAPI } from "@/lib/api";
+import { toast } from "react-hot-toast";
 
 export default function MyTicketsPage() {
-  const tickets = [
-    {
-      id: 1,
-      event: "Tech Conference 2024",
-      date: "Dec 15, 2024",
-      time: "9:00 AM",
-      location: "Addis Ababa Convention Center",
-      ticketType: "VIP",
-      price: 2500,
-      status: "confirmed",
-    },
-    {
-      id: 2,
-      event: "Music Festival",
-      date: "Dec 20, 2024",
-      time: "6:00 PM",
-      location: "Meskel Square",
-      ticketType: "General",
-      price: 800,
-      status: "pending",
-    },
-  ];
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const fetchTickets = async () => {
+    try {
+      const response = await dashboardAPI.getUserBookings();
+      setTickets(response.data.bookings || []);
+    } catch (error) {
+      toast.error('Failed to fetch tickets');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -31,13 +39,13 @@ export default function MyTicketsPage() {
       <div className="space-y-4">
         {tickets.map((ticket) => (
           <div
-            key={ticket.id}
+            key={ticket._id}
             className="p-6 border rounded-lg bg-surface border-muted"
           >
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-primary">
-                  {ticket.event}
+                  {ticket.event?.title}
                 </h3>
                 <span
                   className={`inline-block px-2 py-1 rounded text-xs font-medium ${
@@ -58,29 +66,40 @@ export default function MyTicketsPage() {
             <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3 text-muted">
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4" />
-                <span>{ticket.date}</span>
+                <span>{new Date(ticket.event?.startAt).toLocaleDateString()}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Clock className="w-4 h-4" />
-                <span>{ticket.time}</span>
+                <span>{new Date(ticket.event?.startAt).toLocaleTimeString()}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4" />
-                <span>{ticket.location}</span>
+                <span>{ticket.event?.venue}</span>
               </div>
             </div>
 
             <div className="flex items-center justify-between mt-4">
               <span className="text-sm text-muted">
-                {ticket.ticketType} Ticket
+                {ticket.ticketType || 'General'} Ticket
               </span>
               <span className="font-semibold text-primary">
-                {ticket.price} ETB
+                {ticket.totalAmount} ETB
               </span>
             </div>
           </div>
         ))}
       </div>
+
+      {tickets.length === 0 && (
+        <div className="py-12 text-center">
+          <h3 className="mb-2 text-lg font-medium text-primary">
+            No tickets found
+          </h3>
+          <p className="text-muted">
+            You haven't booked any events yet.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

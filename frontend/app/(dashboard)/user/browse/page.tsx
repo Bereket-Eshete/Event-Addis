@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -11,69 +11,10 @@ import {
   DollarSign,
 } from "lucide-react";
 import Image from "next/image";
+import { eventsAPI, dashboardAPI } from "@/lib/api";
+import { toast } from "react-hot-toast";
 
-const events = [
-  {
-    id: 1,
-    name: "AI & Machine Learning Conference",
-    date: "2025-01-15",
-    time: "09:00",
-    location: "Addis Ababa University",
-    price: 800,
-    category: "Technology",
-    attendees: 150,
-    image: "/event-one-min.jpg",
-    organizer: "Tech Hub Addis",
-    isFavorite: false,
-    description:
-      "Join leading AI experts for a day of insights into machine learning and artificial intelligence.",
-  },
-  {
-    id: 2,
-    name: "Ethiopian Coffee Festival",
-    date: "2025-01-20",
-    time: "10:00",
-    location: "Meskel Square",
-    price: 0,
-    category: "Culture",
-    attendees: 500,
-    image: "/event-two-min.jpg",
-    organizer: "Cultural Events ET",
-    isFavorite: true,
-    description:
-      "Celebrate Ethiopian coffee culture with tastings, ceremonies, and cultural performances.",
-  },
-  {
-    id: 3,
-    name: "Startup Pitch Competition",
-    date: "2025-01-25",
-    time: "14:00",
-    location: "iCog Labs",
-    price: 300,
-    category: "Business",
-    attendees: 80,
-    image: "/event-three-min.jpg",
-    organizer: "Startup Ethiopia",
-    isFavorite: false,
-    description:
-      "Watch innovative startups pitch their ideas to investors and industry experts.",
-  },
-  {
-    id: 4,
-    name: "Digital Marketing Workshop",
-    date: "2025-02-01",
-    time: "13:00",
-    location: "Hyatt Regency",
-    price: 1200,
-    category: "Workshop",
-    attendees: 60,
-    image: "/event-four-min.jpg",
-    organizer: "Marketing Pro ET",
-    isFavorite: false,
-    description:
-      "Learn the latest digital marketing strategies and tools from industry professionals.",
-  },
-];
+
 
 const categories = [
   "All",
@@ -96,12 +37,40 @@ export default function BrowseEventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPriceRange, setSelectedPriceRange] = useState("All");
-  const [favorites, setFavorites] = useState(new Set([2]));
+  const [events, setEvents] = useState([]);
+  const [favorites, setFavorites] = useState(new Set());
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEvents();
+    fetchFavorites();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await eventsAPI.getAllEvents();
+      setEvents(response.data.events || []);
+    } catch (error) {
+      toast.error('Failed to fetch events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFavorites = async () => {
+    try {
+      const response = await dashboardAPI.getUserFavorites();
+      const favoriteIds = new Set(response.data.favorites.map(fav => fav._id));
+      setFavorites(favoriteIds);
+    } catch (error) {
+      console.error('Failed to fetch favorites');
+    }
+  };
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch =
-      event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchTerm.toLowerCase());
+      event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.venue?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       selectedCategory === "All" || event.category === selectedCategory;
     const matchesPrice =
@@ -118,14 +87,22 @@ export default function BrowseEventsPage() {
     return matchesSearch && matchesCategory && matchesPrice;
   });
 
-  const toggleFavorite = (eventId: number) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(eventId)) {
-      newFavorites.delete(eventId);
-    } else {
-      newFavorites.add(eventId);
+  const toggleFavorite = async (eventId: string) => {
+    try {
+      const newFavorites = new Set(favorites);
+      if (newFavorites.has(eventId)) {
+        await dashboardAPI.removeFromFavorites(eventId);
+        newFavorites.delete(eventId);
+        toast.success('Removed from favorites');
+      } else {
+        await dashboardAPI.addToFavorites(eventId);
+        newFavorites.add(eventId);
+        toast.success('Added to favorites');
+      }
+      setFavorites(newFavorites);
+    } catch (error) {
+      toast.error('Failed to update favorites');
     }
-    setFavorites(newFavorites);
   };
 
   return (
@@ -202,30 +179,38 @@ export default function BrowseEventsPage() {
         </p>
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
+
       {/* Events Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredEvents.map((event) => (
+      {!loading && (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredEvents.map((event) => (
           <div
-            key={event.id}
+            key={event._id}
             className="overflow-hidden transition-shadow card hover:shadow-lg"
           >
             {/* Event Image */}
             <div className="relative h-48">
               <Image
-                src={event.image}
-                alt={event.name}
+                src={event.image || "/event-one-min.jpg"}
+                alt={event.title}
                 fill
                 className="object-cover"
               />
 
               {/* Favorite Button */}
               <button
-                onClick={() => toggleFavorite(event.id)}
+                onClick={() => toggleFavorite(event._id)}
                 className="absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full top-4 right-4 bg-white/90 hover:bg-white"
               >
                 <Heart
                   className={`h-4 w-4 ${
-                    favorites.has(event.id)
+                    favorites.has(event._id)
                       ? "text-red-500 fill-red-500"
                       : "text-gray-600"
                   }`}
@@ -246,7 +231,7 @@ export default function BrowseEventsPage() {
             {/* Event Details */}
             <div className="p-6">
               <h3 className="mb-2 text-lg font-bold text-primary line-clamp-2">
-                {event.name}
+                {event.title}
               </h3>
 
               <p className="mb-4 text-sm text-muted line-clamp-2">
@@ -257,34 +242,35 @@ export default function BrowseEventsPage() {
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2 text-primary" />
                   <span>
-                    {new Date(event.date).toLocaleDateString()} at {event.time}
+                    {new Date(event.startAt).toLocaleDateString()} at {new Date(event.startAt).toLocaleTimeString()}
                   </span>
                 </div>
 
                 <div className="flex items-center">
                   <MapPin className="w-4 h-4 mr-2 text-primary" />
-                  <span>{event.location}</span>
+                  <span>{event.venue}</span>
                 </div>
 
                 <div className="flex items-center">
                   <Users className="w-4 h-4 mr-2 text-primary" />
-                  <span>{event.attendees} interested</span>
+                  <span>{event.capacity} capacity</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="text-xs text-muted">by {event.organizer}</div>
+                <div className="text-xs text-muted">by {event.organizerId?.organizationName || event.organizerId?.fullName || 'Unknown Organizer'}</div>
                 <button className="px-4 py-2 text-sm rounded-lg btn-primary">
                   View Details
                 </button>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* No Results */}
-      {filteredEvents.length === 0 && (
+      {!loading && filteredEvents.length === 0 && (
         <div className="py-12 text-center">
           <Search className="w-12 h-12 mx-auto mb-4 text-muted" />
           <h3 className="mb-2 text-lg font-medium text-primary">

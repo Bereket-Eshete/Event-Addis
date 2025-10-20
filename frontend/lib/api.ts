@@ -51,6 +51,20 @@ export const dashboardAPI = {
     api.get('/dashboard/organizer/payments', { params }),
   getOrganizerAnalytics: (period?: string) => 
     api.get(`/dashboard/organizer/analytics?period=${period || '30d'}`),
+  
+  // User dashboard endpoints
+  getUserStats: () => api.get('/dashboard/user/stats'),
+  getUserBookings: (params?: { page?: number; limit?: number }) => 
+    api.get('/dashboard/user/bookings', { params }),
+  getUserPayments: (params?: { page?: number; limit?: number }) => 
+    api.get('/dashboard/user/payments', { params }),
+  getUserFavorites: (params?: { page?: number; limit?: number }) => 
+    api.get('/dashboard/user/favorites', { params }),
+  getUserMessages: (params?: { page?: number; limit?: number }) => 
+    api.get('/dashboard/user/messages', { params }),
+  markMessageAsRead: (messageId: string) => api.post(`/dashboard/user/messages/${messageId}/read`),
+  addToFavorites: (eventId: string) => api.post('/dashboard/user/favorites', { eventId }),
+  removeFromFavorites: (eventId: string) => api.delete(`/dashboard/user/favorites/${eventId}`),
 }
 
 export const eventsAPI = {
@@ -58,6 +72,9 @@ export const eventsAPI = {
   updateEvent: (id: string, data: any) => api.patch(`/api/events/${id}`, data),
   deleteEvent: (id: string) => api.delete(`/api/events/${id}`),
   getEvent: (id: string) => api.get(`/api/events/${id}`),
+  getAllEvents: (params?: { page?: number; limit?: number; category?: string; search?: string }) => 
+    api.get('/api/events', { params }),
+  bookEvent: (eventId: string, data: any) => api.post(`/api/events/${eventId}/book`, data),
 }
 
 export const profileAPI = {
