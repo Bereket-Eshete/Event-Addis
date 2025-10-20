@@ -20,6 +20,21 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// Handle auth errors globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear auth data and redirect to login
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
 // Auth API calls
 export const authAPI = {
   register: (data: { fullName: string; email: string; password: string; role: string; termsAccepted: boolean; organizationName?: string; organizationWebsite?: string; contactNumber?: string }) =>
@@ -42,6 +57,7 @@ export const authAPI = {
 }
 
 export const dashboardAPI = {
+  getUserInfo: () => api.get('/dashboard/user-info'),
   getOrganizerStats: () => api.get('/dashboard/organizer/stats'),
   getOrganizerEvents: (params?: { page?: number; limit?: number; status?: string }) => 
     api.get('/dashboard/organizer/events', { params }),

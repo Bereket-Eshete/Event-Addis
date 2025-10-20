@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Calendar, MapPin, Clock, Download } from "lucide-react";
 import { dashboardAPI } from "@/lib/api";
 import { toast } from "react-hot-toast";
+import { generateTicketPDF } from "@/utils/ticketGenerator";
+import { viewTicket } from "@/utils/ticketViewer";
 
 export default function MyTicketsPage() {
   const [tickets, setTickets] = useState([]);
@@ -45,7 +47,7 @@ export default function MyTicketsPage() {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-primary">
-                  {ticket.event?.title}
+                  {ticket.eventId?.title}
                 </h3>
                 <span
                   className={`inline-block px-2 py-1 rounded text-xs font-medium ${
@@ -57,24 +59,35 @@ export default function MyTicketsPage() {
                   {ticket.status}
                 </span>
               </div>
-              <button className="flex items-center px-3 py-2 space-x-2 text-white rounded-lg bg-primary hover:bg-primary/90">
-                <Download className="w-4 h-4" />
-                <span>Download</span>
-              </button>
+              <div className="flex space-x-2">
+                <button 
+                  onClick={() => viewTicket(ticket)}
+                  className="flex items-center px-3 py-2 space-x-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+                >
+                  <span>View</span>
+                </button>
+                <button 
+                  onClick={() => generateTicketPDF(ticket)}
+                  className="flex items-center px-3 py-2 space-x-2 text-white rounded-lg bg-primary hover:bg-primary/90"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3 text-muted">
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4" />
-                <span>{new Date(ticket.event?.startAt).toLocaleDateString()}</span>
+                <span>{new Date(ticket.eventId?.startAt).toLocaleDateString()}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Clock className="w-4 h-4" />
-                <span>{new Date(ticket.event?.startAt).toLocaleTimeString()}</span>
+                <span>{new Date(ticket.eventId?.startAt).toLocaleTimeString()}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4" />
-                <span>{ticket.event?.venue}</span>
+                <span>{ticket.eventId?.venue}</span>
               </div>
             </div>
 

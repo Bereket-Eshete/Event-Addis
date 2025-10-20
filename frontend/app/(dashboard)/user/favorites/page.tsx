@@ -2,22 +2,38 @@
 
 import { useState, useEffect } from "react";
 import { Heart, Calendar, MapPin, Clock, Users } from "lucide-react";
+import Image from "next/image";
 import { dashboardAPI } from "@/lib/api";
 import { toast } from "react-hot-toast";
+import BookingModal from "@/components/ui/BookingModal";
 
 export default function FavoritesPage() {
   const [favoriteEvents, setFavoriteEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   useEffect(() => {
     fetchFavorites();
   }, []);
 
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchFavorites();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   const fetchFavorites = async () => {
     try {
       const response = await dashboardAPI.getUserFavorites();
-      setFavoriteEvents(response.data.favorites || []);
+      console.log('Favorites API response:', response.data);
+      const favorites = response.data.favorites || [];
+      console.log('Favorites events:', favorites);
+      setFavoriteEvents(favorites);
     } catch (error) {
+      console.error('Favorites error:', error);
       toast.error('Failed to fetch favorites');
     } finally {
       setLoading(false);
@@ -26,11 +42,20 @@ export default function FavoritesPage() {
 
   const removeFromFavorites = async (eventId) => {
     try {
+      console.log('Removing from favorites:', eventId);
       await dashboardAPI.removeFromFavorites(eventId);
+      // Remove from local state immediately
       setFavoriteEvents(prev => prev.filter(event => event._id !== eventId));
       toast.success('Removed from favorites');
+      // Refresh from server to ensure consistency
+      setTimeout(() => {
+        fetchFavorites();
+      }, 500);
     } catch (error) {
+      console.error('Remove error:', error);
       toast.error('Failed to remove from favorites');
+      // Refresh on error to show current state
+      fetchFavorites();
     }
   };
 
@@ -57,8 +82,13 @@ export default function FavoritesPage() {
             key={event._id}
             className="overflow-hidden transition-shadow border rounded-lg bg-surface border-muted hover:shadow-lg"
           >
-            <div className="relative">
-              <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/20"></div>
+            <div className="relative h-48">
+              <Image
+                src={event.image || "/event-one-min.jpg"}
+                alt={event.title || "Event image"}
+                fill
+                className="object-cover"
+              />
               <button 
                 onClick={() => removeFromFavorites(event._id)}
                 className="absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full top-3 right-3 bg-white/90 hover:bg-white"
@@ -68,32 +98,38 @@ export default function FavoritesPage() {
             </div>
 
             <div className="p-4">
-              <h3 className="mb-2 font-semibold text-primary">{event.title}</h3>
+              <h3 className="mb-2 font-semibold text-primary">{event.title || "Untitled Event"}</h3>
 
               <div className="mb-4 space-y-2 text-sm text-muted">
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" />
-                  <span>{new Date(event.startAt).toLocaleDateString()}</span>
+                  <span>{event.startAt ? new Date(event.startAt).toLocaleDateString() : "Date TBD"}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Clock className="w-4 h-4" />
-                  <span>{new Date(event.startAt).toLocaleTimeString()}</span>
+                  <span>{event.startAt ? new Date(event.startAt).toLocaleTimeString() : "Time TBD"}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <MapPin className="w-4 h-4" />
-                  <span>{event.venue}</span>
+                  <span>{event.venue || "Venue TBD"}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
-                  <span>{event.capacity} capacity</span>
+                  <span>{event.capacity || 0} capacity</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-primary">
-                  {event.price} ETB
+                  {event.price === 0 || event.price === undefined ? "Free" : `${event.price} ETB`}
                 </span>
-                <button className="px-4 py-2 text-sm text-white transition-opacity rounded-lg gradient-primary hover:opacity-90">
+                <button 
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setShowBookingModal(true);
+                  }}
+                  className="px-4 py-2 text-sm text-white transition-opacity rounded-lg gradient-primary hover:opacity-90"
+                >
                   Book Now
                 </button>
               </div>
@@ -112,6 +148,16 @@ export default function FavoritesPage() {
           </p>
         </div>
       )}
+
+      {/* Booking Modal */}
+      <BookingModal
+        event={selectedEvent}
+        isOpen={showBookingModal}
+        onClose={() => {
+          setShowBookingModal(false);
+          setSelectedEvent(null);
+        }}
+      />
     </div>
   );
 }

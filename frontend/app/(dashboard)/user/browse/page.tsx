@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Filter,
@@ -34,6 +35,7 @@ const priceRanges = [
 ];
 
 export default function BrowseEventsPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPriceRange, setSelectedPriceRange] = useState("All");
@@ -197,7 +199,7 @@ export default function BrowseEventsPage() {
             {/* Event Image */}
             <div className="relative h-48">
               <Image
-                src={event.image || "/event-one-min.jpg"}
+                src={event.bannerUrl || "/event-one-min.jpg"}
                 alt={event.title}
                 fill
                 className="object-cover"
@@ -259,7 +261,10 @@ export default function BrowseEventsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="text-xs text-muted">by {event.organizerId?.organizationName || event.organizerId?.fullName || 'Unknown Organizer'}</div>
-                <button className="px-4 py-2 text-sm rounded-lg btn-primary">
+                <button 
+                  onClick={() => router.push(`/user/events/${event._id}`)}
+                  className="px-4 py-2 text-sm rounded-lg btn-primary"
+                >
                   View Details
                 </button>
               </div>

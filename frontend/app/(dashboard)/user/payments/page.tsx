@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react';
 import { CreditCard, Calendar, CheckCircle, Clock } from 'lucide-react';
 import { dashboardAPI } from '@/lib/api';
 import { toast } from 'react-hot-toast';
+import ReceiptModal from '@/components/ui/ReceiptModal';
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
 
   useEffect(() => {
     fetchPayments();
@@ -49,8 +52,8 @@ export default function PaymentsPage() {
           <div key={payment._id} className="bg-surface border border-muted rounded-lg p-6">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-primary">{payment.event?.title}</h3>
-                <p className="text-sm text-muted">Booking ID: {payment._id}</p>
+                <h3 className="text-lg font-semibold text-primary">{payment.eventId?.title}</h3>
+                <p className="text-sm text-muted">Booking Ref: EA-{payment._id.slice(-6).toUpperCase()}</p>
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold text-primary">{payment.totalAmount} ETB</p>
@@ -66,6 +69,15 @@ export default function PaymentsPage() {
                     {payment.status}
                   </span>
                 </div>
+                <button 
+                  onClick={() => {
+                    setSelectedPayment(payment);
+                    setShowReceiptModal(true);
+                  }}
+                  className="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-primary/90 mt-1 block"
+                >
+                  Receipt
+                </button>
               </div>
             </div>
             
@@ -93,6 +105,16 @@ export default function PaymentsPage() {
           </p>
         </div>
       )}
+
+      {/* Receipt Modal */}
+      <ReceiptModal
+        payment={selectedPayment}
+        isOpen={showReceiptModal}
+        onClose={() => {
+          setShowReceiptModal(false);
+          setSelectedPayment(null);
+        }}
+      />
     </div>
   )
 }

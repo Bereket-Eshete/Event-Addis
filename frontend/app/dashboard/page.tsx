@@ -34,16 +34,28 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
+      console.log('Current user:', user);
+      console.log('Token from localStorage:', localStorage.getItem('token'));
+      
+      // First check user info
+      const userInfoResponse = await dashboardAPI.getUserInfo();
+      console.log('User info from backend:', userInfoResponse.data);
+      
       const [statsResponse, eventsResponse] = await Promise.all([
         dashboardAPI.getOrganizerStats(),
         dashboardAPI.getOrganizerEvents({ limit: 5 })
       ]);
       
+      console.log('Stats response from backend:', statsResponse.data);
+      console.log('Revenue value:', statsResponse.data.totalRevenue, 'Type:', typeof statsResponse.data.totalRevenue);
+      
       setStats(statsResponse.data);
       setRecentEvents(eventsResponse.data.events);
     } catch (error: any) {
-      toast.error('Failed to load dashboard data');
-      console.error('Dashboard error:', error);
+      console.error('Dashboard error details:', error.response?.data || error.message);
+      if (error.response?.status !== 401) {
+        toast.error('Failed to load dashboard data');
+      }
     } finally {
       setLoading(false);
     }
@@ -70,7 +82,7 @@ export default function DashboardPage() {
     },
     {
       name: "Total Revenue",
-      value: loading ? "..." : `${stats.totalRevenue} ETB`,
+      value: loading ? "..." : `${(stats.totalRevenue || 0).toLocaleString()} ETB`,
       icon: DollarSign,
       change: "Total earned",
     },

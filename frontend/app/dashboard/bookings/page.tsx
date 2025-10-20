@@ -49,15 +49,15 @@ export default function BookingsPage() {
 
   // Get unique events from bookings
   const uniqueEvents = Array.from(
-    new Set(bookings.map((booking: any) => booking.event?.title).filter(Boolean))
+    new Set(bookings.map((booking: any) => booking.eventId?.title).filter(Boolean))
   );
   const events = ['All Events', ...uniqueEvents];
 
   const filteredBookings = bookings.filter((booking: any) => {
     const matchesSearch =
-      booking.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesEvent = selectedEvent === 'All Events' || booking.event?.title === selectedEvent;
+      booking.userId?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesEvent = selectedEvent === 'All Events' || booking.eventId?.title === selectedEvent;
     return matchesSearch && matchesEvent;
   });
 
@@ -100,7 +100,7 @@ export default function BookingsPage() {
   const checkedInCount = filteredBookings.filter(
     (b) => b.checkInStatus === "checked-in"
   ).length;
-  const totalRevenue = filteredBookings.reduce((sum, b) => sum + b.amount, 0);
+  const totalRevenue = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -273,20 +273,20 @@ export default function BookingsPage() {
                     <td className="px-6 py-4">
                       <div>
                         <div className="font-medium text-primary">
-                          {booking.user?.fullName || 'Unknown User'}
+                          {booking.userId?.fullName || 'Unknown User'}
                         </div>
                         <div className="flex items-center mt-1 text-sm text-muted">
                           <Mail className="w-3 h-3 mr-1" />
-                          {booking.user?.email || 'No email'}
+                          {booking.userId?.email || 'No email'}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-medium text-primary">
-                        {booking.event?.title || 'Unknown Event'}
+                        {booking.eventId?.title || 'Unknown Event'}
                       </div>
                       <div className="text-sm text-muted">
-                        {booking.event?.location || 'No location'}
+                        {booking.eventId?.venue || 'No location'}
                       </div>
                     </td>
                     <td className="px-6 py-4">

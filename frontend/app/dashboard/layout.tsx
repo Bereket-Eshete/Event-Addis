@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Calendar,
   Ticket,
@@ -15,8 +15,10 @@ import {
   X,
   Bell,
   LogOut,
+  Loader,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/lib/auth";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
@@ -35,6 +37,36 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, validateAuth, logout } = useAuth();
+
+  useEffect(() => {
+    validateAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader className="w-8 h-8 animate-spin text-primary" />
+        <span className="ml-2 text-primary">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
@@ -138,13 +170,19 @@ export default function DashboardLayout({
             <ThemeToggle />
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary">
-                <span className="text-sm font-medium text-white">B</span>
+                <span className="text-sm font-medium text-white">
+                  {user?.fullName?.charAt(0) || 'U'}
+                </span>
               </div>
               <span className="hidden font-medium text-primary sm:block">
-                Bereket
+                {user?.fullName || 'User'}
               </span>
             </div>
-            <button className="p-2 transition-colors rounded-lg hover:bg-surface" suppressHydrationWarning>
+            <button 
+              onClick={handleLogout}
+              className="p-2 transition-colors rounded-lg hover:bg-surface" 
+              suppressHydrationWarning
+            >
               <LogOut className="w-5 h-5 text-primary" />
             </button>
           </div>

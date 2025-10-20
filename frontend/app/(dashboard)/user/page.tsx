@@ -31,17 +31,36 @@ export default function UserDashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        toast.error('Please login to continue')
+        window.location.href = '/login'
+        return
+      }
+
       const [statsResponse, bookingsResponse, eventsResponse] = await Promise.all([
         dashboardAPI.getUserStats(),
-        dashboardAPI.getUserBookings({ limit: 3 }),
-        eventsAPI.getAllEvents({ limit: 2 })
+        dashboardAPI.getUserBookings({ limit: 10 }),
+        eventsAPI.getAllEvents({ limit: 10 })
       ])
       
       setStats(statsResponse.data)
-      setUpcomingEvents(bookingsResponse.data.bookings)
-      setRecommendedEvents(eventsResponse.data.events || eventsResponse.data)
+      const bookings = bookingsResponse.data.bookings
+      setUpcomingEvents(bookings.slice(0, 3))
+      
+      // Filter out events user already booked
+      const bookedEventIds = bookings.map(booking => booking.eventId?._id)
+      const availableEvents = (eventsResponse.data.events || eventsResponse.data)
+        .filter(event => !bookedEventIds.includes(event._id))
+      setRecommendedEvents(availableEvents.slice(0, 2))
     } catch (error: any) {
-      toast.error('Failed to load dashboard data')
+      if (error.response?.status === 401) {
+        toast.error('Session expired. Please login again')
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      } else {
+        toast.error('Failed to load dashboard data')
+      }
       console.error('Dashboard error:', error)
     } finally {
       setLoading(false)
@@ -131,15 +150,15 @@ export default function UserDashboardPage() {
                 </div>
                 
                 <div className="flex-1">
-                  <h3 className="font-semibold text-primary">{event.event?.title}</h3>
+                  <h3 className="font-semibold text-primary">{event.eventId?.title}</h3>
                   <div className="flex items-center space-x-4 mt-1 text-sm text-muted">
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      {new Date(event.event?.startAt).toLocaleDateString()} at {new Date(event.event?.startAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      {new Date(event.eventId?.startAt).toLocaleDateString()} at {new Date(event.eventId?.startAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </div>
                     <div className="flex items-center">
                       <MapPin className="h-4 w-4 mr-1" />
-                      {event.event?.venue}
+                      {event.eventId?.venue}
                     </div>
                   </div>
                 </div>
@@ -227,18 +246,24 @@ export default function UserDashboardPage() {
               {day}
             </div>
           ))}
-          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-            <div
-              key={day}
-              className={`p-2 text-sm rounded-lg transition-colors ${
-                [18, 20, 22].includes(day)
-                  ? 'bg-primary text-white font-medium'
-                  : 'text-primary hover:bg-surface'
-              }`}
-            >
-              {day}
-            </div>
-          ))}
+          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
+            const eventDays = upcomingEvents.map(event => 
+              new Date(event.eventId?.startAt).getDate()
+            ).filter(Boolean)
+            
+            return (
+              <div
+                key={day}
+                className={`p-2 text-sm rounded-lg transition-colors ${
+                  eventDays.includes(day)
+                    ? 'bg-primary text-white font-medium'
+                    : 'text-primary hover:bg-surface'
+                }`}
+              >
+                {day}
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

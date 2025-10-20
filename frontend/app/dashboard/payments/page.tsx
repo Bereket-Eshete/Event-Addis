@@ -274,18 +274,18 @@ export default function PaymentsPage() {
                   >
                     <td className="px-6 py-4">
                       <div className="font-medium text-primary">
-                        {payment.event?.title || 'Unknown Event'}
+                        {payment.eventId?.title || 'Unknown Event'}
                       </div>
                       <div className="text-sm text-muted">
-                        {payment.event?.location || 'No location'}
+                        {payment.eventId?.venue || 'No location'}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-medium text-primary">
-                        {payment.user?.fullName || 'Unknown User'}
+                        {payment.userId?.fullName || 'Unknown User'}
                       </div>
                       <div className="text-sm text-muted">
-                        {payment.user?.email || 'No email'}
+                        {payment.userId?.email || 'No email'}
                       </div>
                     </td>
                     <td className="px-6 py-4">

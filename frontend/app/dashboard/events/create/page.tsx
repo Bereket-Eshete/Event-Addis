@@ -45,6 +45,27 @@ export default function CreateEventPage() {
     setLoading(true);
 
     try {
+      let bannerUrl = '';
+      
+      // Upload image if provided
+      if (formData.image) {
+        const imageFormData = new FormData();
+        imageFormData.append('file', formData.image);
+        
+        const uploadResponse = await fetch('/api/uploads', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: imageFormData
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          bannerUrl = uploadResult.url;
+        }
+      }
+
       const eventData = {
         title: formData.title,
         description: formData.description,
@@ -56,7 +77,8 @@ export default function CreateEventPage() {
         capacity: parseInt(formData.capacity),
         price: parseFloat(formData.price) || 0,
         registrationDeadline: new Date(`${formData.registrationDeadline}T23:59`).toISOString(),
-        status: 'published'
+        status: 'published',
+        bannerUrl
       };
 
       await eventsAPI.createEvent(eventData);
