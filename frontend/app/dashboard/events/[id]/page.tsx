@@ -1,5 +1,5 @@
 "use client";
-
+//dynamic event page
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Calendar, MapPin, Users, DollarSign, Clock } from 'lucide-react';
