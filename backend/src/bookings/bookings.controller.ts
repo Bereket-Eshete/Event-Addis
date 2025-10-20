@@ -48,4 +48,16 @@ export class BookingsController {
   getEventBookingStats(@Param('id') eventId: string, @Req() req) {
     return this.bookingsService.getEventBookingStats(eventId, req.user.userId);
   }
+
+  @Post('chapa/callback')
+  handleChapaCallback(@Body() body: any) {
+    const { tx_ref, status } = body;
+    return this.bookingsService.handleChapaCallback(tx_ref, status);
+  }
+
+  @Post('verify-payment/:txRef')
+  @UseGuards(JwtAuthGuard)
+  verifyPayment(@Param('txRef') txRef: string) {
+    return this.bookingsService.verifyAndConfirmPayment(txRef);
+  }
 }

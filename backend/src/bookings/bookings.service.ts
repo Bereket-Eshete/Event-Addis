@@ -85,6 +85,7 @@ export class BookingsService {
       userId,
       eventId,
       quantity: createBookingDto.quantity,
+      totalAmount,
       paymentInfo: {
         provider:
           event.price > 0 ? PaymentProvider.CHAPA : PaymentProvider.NONE,
@@ -128,7 +129,8 @@ export class BookingsService {
           message: 'Please complete payment to confirm booking',
         };
       } catch (error) {
-        throw new BadRequestException('Failed to initialize payment');
+        console.error('Chapa payment initialization error:', error);
+        throw new BadRequestException(`Failed to initialize payment: ${error.message}`);
       }
     }
   }
@@ -139,6 +141,12 @@ export class BookingsService {
     event: Event,
     txRef: string,
   ) {
+    console.log('Initializing Chapa payment with:', {
+      amount: booking.paymentInfo.amount,
+      txRef,
+      userEmail: user.email
+    });
+    
     const response = await this.chapaService.initialize({
       first_name: user.fullName.split(' ')[0],
       last_name: user.fullName.split(' ').slice(1).join(' ') || 'User',
@@ -146,41 +154,49 @@ export class BookingsService {
       currency: 'ETB',
       amount: booking.paymentInfo.amount.toString(),
       tx_ref: txRef,
-      callback_url: process.env.CHAPA_CALLBACK_URL,
-      return_url: `${process.env.FRONTEND_URL}/booking-result`,
+      return_url: `https://6a03dc12f633.ngrok-free.app/booking-result?trx_ref=${txRef}&status=success`,
       customization: {
-        title: `EventAddis - ${event.title}`,
+        title: 'EventAddis',
         description: `Payment for ${event.title}`,
       },
     });
 
+    console.log('Chapa response:', response);
     return response.data.checkout_url;
   }
 
   async handleChapaCallback(txRef: string, status: string) {
+    console.log('Chapa callback received:', { txRef, status });
+    
     const booking = await this.bookingModel
       .findOne({ 'paymentInfo.reference': txRef })
       .populate('userId')
       .populate('eventId');
 
     if (!booking) {
+      console.log('Booking not found for txRef:', txRef);
       throw new NotFoundException('Booking not found');
     }
+
+    console.log('Found booking:', booking._id, 'current status:', booking.status);
 
     if (status === 'success') {
       // Verify payment with Chapa
       try {
         const verification = await this.chapaService.verify({ tx_ref: txRef });
+        console.log('Chapa verification result:', verification.data.status);
 
         if (verification.data.status === 'success') {
           booking.status = BookingStatus.CONFIRMED;
           booking.paymentInfo.transactionId = verification.data.reference;
           await booking.save();
+          console.log('Booking confirmed and saved');
 
           // Update event registered count
           await this.eventModel.findByIdAndUpdate(booking.eventId, {
             $inc: { registeredCount: booking.quantity },
           });
+          console.log('Event registered count updated');
 
           // Send confirmation email
           await this.sendBookingConfirmationEmail(
@@ -192,6 +208,7 @@ export class BookingsService {
           return { message: 'Payment confirmed successfully' };
         }
       } catch (error) {
+        console.error('Payment verification failed:', error);
         booking.status = BookingStatus.PAYMENT_FAILED;
         await booking.save();
         throw new BadRequestException('Payment verification failed');
@@ -208,6 +225,21 @@ export class BookingsService {
     }
 
     return { message: 'Payment status updated' };
+  }
+
+  async verifyAndConfirmPayment(txRef: string) {
+    try {
+      const verification = await this.chapaService.verify({ tx_ref: txRef });
+      
+      if (verification.data.status === 'success') {
+        return await this.handleChapaCallback(txRef, 'success');
+      } else {
+        return await this.handleChapaCallback(txRef, 'failed');
+      }
+    } catch (error) {
+      console.error('Manual verification failed:', error);
+      throw new BadRequestException('Payment verification failed');
+    }
   }
 
   async getUserBookings(userId: string, page = 1, limit = 10) {

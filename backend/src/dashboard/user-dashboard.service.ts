@@ -16,14 +16,14 @@ export class UserDashboardService {
   ) {}
 
   async getUserStats(userId: string) {
-    const totalBookings = await this.bookingModel.countDocuments({ user: userId });
+    const totalBookings = await this.bookingModel.countDocuments({ userId: userId });
     const upcomingEvents = await this.bookingModel.countDocuments({
-      user: userId,
-      'event.startAt': { $gte: new Date() }
+      userId: userId,
+      status: 'confirmed'
     });
     
     const totalSpent = await this.bookingModel.aggregate([
-      { $match: { user: userId, status: 'confirmed' } },
+      { $match: { userId: userId, status: 'confirmed' } },
       { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]);
 
@@ -41,13 +41,13 @@ export class UserDashboardService {
     const { page = 1, limit = 10 } = query;
     
     const bookings = await this.bookingModel
-      .find({ user: userId })
-      .populate('event', 'title startAt venue price category')
+      .find({ userId: userId })
+      .populate('eventId', 'title startAt venue price category')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
-    const total = await this.bookingModel.countDocuments({ user: userId });
+    const total = await this.bookingModel.countDocuments({ userId: userId });
 
     return {
       bookings,
@@ -61,13 +61,13 @@ export class UserDashboardService {
     const { page = 1, limit = 10 } = query;
     
     const payments = await this.bookingModel
-      .find({ user: userId, status: 'confirmed' })
-      .populate('event', 'title startAt')
+      .find({ userId: userId, status: 'confirmed' })
+      .populate('eventId', 'title startAt')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
-    const total = await this.bookingModel.countDocuments({ user: userId, status: 'confirmed' });
+    const total = await this.bookingModel.countDocuments({ userId: userId, status: 'confirmed' });
 
     return {
       payments,
@@ -80,22 +80,29 @@ export class UserDashboardService {
   async getUserFavorites(userId: string, query: any) {
     const { page = 1, limit = 10 } = query;
     
-    const user = await this.userModel.findById(userId).populate({
-      path: 'favoriteEvents',
-      options: {
-        limit: limit * 1,
-        skip: (page - 1) * limit,
-        sort: { createdAt: -1 }
-      }
-    });
+    const user = await this.userModel.findById(userId);
+    if (!user || !user.favoriteEvents || user.favoriteEvents.length === 0) {
+      return {
+        favorites: [],
+        total: 0,
+        page: parseInt(page),
+        pages: 0,
+      };
+    }
 
-    const totalFavorites = user?.favoriteEvents?.length || 0;
+    const favoriteEventIds = user.favoriteEvents.slice((page - 1) * limit, page * limit);
+    
+    const favorites = await this.eventModel
+      .find({ _id: { $in: favoriteEventIds } })
+      .populate('organizerId', 'fullName organizationName')
+      .select('title description startAt endAt venue price capacity category type bannerUrl organizerId')
+      .sort({ createdAt: -1 });
 
     return {
-      favorites: user?.favoriteEvents || [],
-      total: totalFavorites,
+      favorites,
+      total: user.favoriteEvents.length,
       page: parseInt(page),
-      pages: Math.ceil(totalFavorites / limit),
+      pages: Math.ceil(user.favoriteEvents.length / limit),
     };
   }
 

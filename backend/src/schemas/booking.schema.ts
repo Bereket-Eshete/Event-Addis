@@ -50,6 +50,9 @@ export class Booking extends Document {
 
   @Prop({ type: PaymentInfo })
   paymentInfo: PaymentInfo;
+
+  @Prop({ default: 0 })
+  totalAmount: number;
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking);

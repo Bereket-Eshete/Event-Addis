@@ -15,37 +15,49 @@ export class DashboardController {
   ) {}
 
   @Get('organizer/stats')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ORGANIZER)
   async getOrganizerStats(@Req() req) {
-    return this.dashboardService.getOrganizerStats(req.user.userId);
+    console.log('Organizer stats request - User:', req.user);
+    if (req.user.role !== UserRole.ORGANIZER) {
+      return { totalEvents: 0, activeEvents: 0, totalBookings: 0, totalRevenue: 0 };
+    }
+    const stats = await this.dashboardService.getOrganizerStats(req.user.userId);
+    console.log('Stats being returned to frontend:', stats);
+    return stats;
   }
 
   @Get('organizer/events')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ORGANIZER)
   async getOrganizerEvents(@Req() req, @Query() query: any) {
+    console.log('Organizer events request - User:', req.user);
+    if (req.user.role !== UserRole.ORGANIZER) {
+      return { events: [], total: 0, page: 1, pages: 0 };
+    }
     return this.dashboardService.getOrganizerEvents(req.user.userId, query);
   }
 
   @Get('organizer/bookings')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ORGANIZER)
   async getOrganizerBookings(@Req() req, @Query() query: any) {
+    console.log('Organizer bookings request - User:', req.user);
+    if (req.user.role !== UserRole.ORGANIZER) {
+      return { bookings: [], total: 0, page: 1, pages: 0 };
+    }
     return this.dashboardService.getOrganizerBookings(req.user.userId, query);
   }
 
   @Get('organizer/payments')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ORGANIZER)
   async getOrganizerPayments(@Req() req, @Query() query: any) {
+    console.log('Organizer payments request - User:', req.user);
+    if (req.user.role !== UserRole.ORGANIZER) {
+      return { payments: [], total: 0, page: 1, pages: 0 };
+    }
     return this.dashboardService.getOrganizerPayments(req.user.userId, query);
   }
 
   @Get('organizer/analytics')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ORGANIZER)
   async getOrganizerAnalytics(@Req() req, @Query('period') period: string) {
+    console.log('Organizer analytics request - User:', req.user);
+    if (req.user.role !== UserRole.ORGANIZER) {
+      return { bookingsOverTime: [], revenueByEvent: [], period };
+    }
     return this.dashboardService.getOrganizerAnalytics(req.user.userId, period);
   }
 
@@ -88,5 +100,15 @@ export class DashboardController {
   @Post('user/messages/:messageId/read')
   async markMessageAsRead(@Req() req, @Param('messageId') messageId: string) {
     return this.userDashboardService.markMessageAsRead(req.user.userId, messageId);
+  }
+
+  @Get('user-info')
+  async getUserInfo(@Req() req) {
+    return {
+      userId: req.user.userId,
+      email: req.user.email,
+      role: req.user.role,
+      message: 'User info retrieved successfully'
+    };
   }
 }

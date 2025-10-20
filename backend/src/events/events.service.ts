@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Event, EventStatus } from '../schemas/event.schema';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -13,7 +13,7 @@ export class EventsService {
   async create(createEventDto: CreateEventDto, organizerId: string) {
     const event = new this.eventModel({
       ...createEventDto,
-      organizerId,
+      organizerId: new Types.ObjectId(organizerId),
       startAt: new Date(createEventDto.startAt),
       endAt: new Date(createEventDto.endAt),
       registrationDeadline: new Date(createEventDto.registrationDeadline),
@@ -150,14 +150,17 @@ export class EventsService {
   async findByOrganizer(organizerId: string, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
     
+    // Handle both string and ObjectId formats
+    const organizerQuery = Types.ObjectId.isValid(organizerId) ? new Types.ObjectId(organizerId) : organizerId;
+    
     const [events, total] = await Promise.all([
       this.eventModel
-        .find({ organizerId })
+        .find({ organizerId: organizerQuery })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .exec(),
-      this.eventModel.countDocuments({ organizerId }),
+      this.eventModel.countDocuments({ organizerId: organizerQuery }),
     ]);
 
     return {
@@ -172,12 +175,15 @@ export class EventsService {
   }
 
   async getOrganizerStats(organizerId: string) {
-    const totalEvents = await this.eventModel.countDocuments({ organizerId });
-    const publishedEvents = await this.eventModel.countDocuments({ organizerId, status: EventStatus.PUBLISHED });
-    const draftEvents = await this.eventModel.countDocuments({ organizerId, status: EventStatus.DRAFT });
+    // Handle both string and ObjectId formats
+    const organizerQuery = Types.ObjectId.isValid(organizerId) ? new Types.ObjectId(organizerId) : organizerId;
+    
+    const totalEvents = await this.eventModel.countDocuments({ organizerId: organizerQuery });
+    const publishedEvents = await this.eventModel.countDocuments({ organizerId: organizerQuery, status: EventStatus.PUBLISHED });
+    const draftEvents = await this.eventModel.countDocuments({ organizerId: organizerQuery, status: EventStatus.DRAFT });
     
     const totalRegistrations = await this.eventModel.aggregate([
-      { $match: { organizerId } },
+      { $match: { organizerId: organizerQuery } },
       { $group: { _id: null, total: { $sum: '$registeredCount' } } }
     ]);
 
