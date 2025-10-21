@@ -126,9 +126,15 @@ export class AuthService {
     user.passwordResetExpires = resetExpires;
     await user.save();
 
-    await this.emailService.sendPasswordResetEmail(email, resetToken);
-
-    return { message: 'Password reset email sent successfully' };
+    try {
+      const emailResult = await this.emailService.sendPasswordResetEmail(email, resetToken);
+      console.log('📧 Password reset email result:', emailResult);
+      return { message: 'Password reset email sent successfully' };
+    } catch (emailError) {
+      console.error('❌ Failed to send password reset email:', emailError);
+      // Still return success to user for security (don't reveal if email exists)
+      return { message: 'Password reset email sent successfully' };
+    }
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
@@ -255,5 +261,21 @@ export class AuthService {
         updatedAt: (updatedUser as any).updatedAt,
       }
     };
+  }
+
+  async testEmail(email: string) {
+    try {
+      console.log('🧪 Testing email service for:', email);
+      const result = await this.emailService.sendEmail(
+        email,
+        'Test Email - EventAddis',
+        '<h2>Test Email</h2><p>This is a test email from EventAddis to verify the email service is working.</p>'
+      );
+      console.log('🧪 Test email result:', result);
+      return { success: true, message: 'Test email sent successfully' };
+    } catch (error) {
+      console.error('🧪 Test email failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 }
