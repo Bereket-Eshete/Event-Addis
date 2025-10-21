@@ -50,14 +50,34 @@ export class BookingsController {
   }
 
   @Post('chapa/callback')
-  handleChapaCallback(@Body() body: any) {
+  async handleChapaCallback(@Body() body: any) {
+    console.log('📨 Chapa callback received:', JSON.stringify(body, null, 2));
     const { tx_ref, status } = body;
-    return this.bookingsService.handleChapaCallback(tx_ref, status);
+    
+    try {
+      const result = await this.bookingsService.handleChapaCallback(tx_ref, status);
+      console.log('✅ Callback handled successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('💥 Callback error:', error.message);
+      throw error;
+    }
   }
 
   @Post('verify-payment/:txRef')
   @UseGuards(JwtAuthGuard)
-  verifyPayment(@Param('txRef') txRef: string) {
-    return this.bookingsService.verifyAndConfirmPayment(txRef);
+  async verifyPayment(@Param('txRef') txRef: string, @Req() req) {
+    console.log('🎯 Payment verification endpoint called');
+    console.log('🔑 User ID:', req.user?.userId);
+    console.log('🏷️ TxRef:', txRef);
+    
+    try {
+      const result = await this.bookingsService.verifyAndConfirmPayment(txRef);
+      console.log('✅ Verification successful:', result);
+      return result;
+    } catch (error) {
+      console.error('💥 Verification endpoint error:', error.message);
+      throw error;
+    }
   }
 }

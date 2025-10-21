@@ -172,7 +172,7 @@ export class BookingsService {
   }
 
   async handleChapaCallback(txRef: string, status: string) {
-
+    console.log('🔄 handleChapaCallback called with txRef:', txRef, 'status:', status);
     
     const booking = await this.bookingModel
       .findOne({ 'paymentInfo.reference': txRef })
@@ -180,29 +180,31 @@ export class BookingsService {
       .populate('eventId');
 
     if (!booking) {
-
+      console.error('❌ Booking not found in callback for txRef:', txRef);
       throw new NotFoundException('Booking not found');
     }
 
-
+    console.log('✅ Found booking in callback:', booking._id, 'Current status:', booking.status);
 
     if (status === 'success') {
       // Verify payment with Chapa
       try {
+        console.log('🔍 Re-verifying payment with Chapa...');
         const verification = await this.chapaService.verify({ tx_ref: txRef });
-
+        console.log('📋 Chapa re-verification response:', JSON.stringify(verification.data, null, 2));
 
         if (verification.data.status === 'success') {
+          console.log('✅ Payment confirmed, updating booking status...');
           booking.status = BookingStatus.CONFIRMED;
           booking.paymentInfo.transactionId = verification.data.reference;
           await booking.save();
-
+          console.log('✅ Booking status updated to CONFIRMED');
 
           // Update event registered count
           await this.eventModel.findByIdAndUpdate(booking.eventId, {
             $inc: { registeredCount: booking.quantity },
           });
-
+          console.log('✅ Event registered count updated');
 
           // Send confirmation email
           await this.sendBookingConfirmationEmail(
@@ -210,6 +212,7 @@ export class BookingsService {
             booking.eventId as any,
             booking,
           );
+          console.log('✅ Confirmation email sent');
 
           // Send system notification
           await this.notificationsService.sendSystemNotification(
@@ -218,16 +221,24 @@ export class BookingsService {
             `Your payment for "${(booking.eventId as any).title}" has been confirmed.`,
             `/user/tickets`
           );
+          console.log('✅ System notification sent');
 
           return { message: 'Payment confirmed successfully' };
+        } else {
+          console.log('❌ Chapa re-verification failed, status:', verification.data.status);
+          booking.status = BookingStatus.PAYMENT_FAILED;
+          await booking.save();
+          throw new BadRequestException('Payment verification failed');
         }
       } catch (error) {
-        console.error('Payment verification failed:', error);
+        console.error('💥 Payment verification failed in callback:', error);
+        console.error('💥 Error response:', error.response?.data);
         booking.status = BookingStatus.PAYMENT_FAILED;
         await booking.save();
         throw new BadRequestException('Payment verification failed');
       }
     } else {
+      console.log('❌ Payment failed, updating booking status...');
       booking.status = BookingStatus.PAYMENT_FAILED;
       await booking.save();
 
@@ -251,15 +262,30 @@ export class BookingsService {
 
   async verifyAndConfirmPayment(txRef: string) {
     try {
+      console.log('🔍 Starting payment verification for txRef:', txRef);
+      
+      // Check if booking exists first
+      const booking = await this.bookingModel.findOne({ 'paymentInfo.reference': txRef });
+      if (!booking) {
+        console.error('❌ Booking not found for txRef:', txRef);
+        throw new NotFoundException('Booking not found');
+      }
+      console.log('✅ Found booking:', booking._id, 'Current status:', booking.status);
+
       const verification = await this.chapaService.verify({ tx_ref: txRef });
+      console.log('📋 Chapa verification response:', JSON.stringify(verification.data, null, 2));
       
       if (verification.data.status === 'success') {
+        console.log('✅ Chapa says payment successful, calling handleChapaCallback');
         return await this.handleChapaCallback(txRef, 'success');
       } else {
+        console.log('❌ Chapa says payment failed, status:', verification.data.status);
         return await this.handleChapaCallback(txRef, 'failed');
       }
     } catch (error) {
-      console.error('Manual verification failed:', error);
+      console.error('💥 Manual verification failed:', error);
+      console.error('💥 Error response:', error.response?.data);
+      console.error('💥 Error status:', error.response?.status);
       throw new BadRequestException('Payment verification failed');
     }
   }
