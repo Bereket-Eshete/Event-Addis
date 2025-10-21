@@ -27,7 +27,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [originalData, setOriginalData] = useState({});
+  const [originalData, setOriginalData] = useState<any>({});
 
   useEffect(() => {
     fetchProfile();

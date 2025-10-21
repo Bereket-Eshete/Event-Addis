@@ -8,7 +8,7 @@ import { generateTicketPDF } from "@/utils/ticketGenerator";
 import { viewTicket } from "@/utils/ticketViewer";
 
 export default function MyTicketsPage() {
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function MyTicketsPage() {
       <h1 className="mb-6 text-2xl font-bold text-primary">My Tickets</h1>
 
       <div className="space-y-4">
-        {tickets.map((ticket) => (
+        {tickets.map((ticket: any) => (
           <div
             key={ticket._id}
             className="p-6 border rounded-lg bg-surface border-muted"

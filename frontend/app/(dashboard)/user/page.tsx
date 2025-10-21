@@ -20,8 +20,8 @@ export default function UserDashboardPage() {
     favoriteEvents: 0,
     totalSpent: 0,
   })
-  const [upcomingEvents, setUpcomingEvents] = useState([])
-  const [recommendedEvents, setRecommendedEvents] = useState([])
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([])
+  const [recommendedEvents, setRecommendedEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const { user } = useAuth()
 
@@ -49,9 +49,9 @@ export default function UserDashboardPage() {
       setUpcomingEvents(bookings.slice(0, 3))
       
       // Filter out events user already booked
-      const bookedEventIds = bookings.map(booking => booking.eventId?._id)
+      const bookedEventIds = bookings.map((booking: any) => booking.eventId?._id)
       const availableEvents = (eventsResponse.data.events || eventsResponse.data)
-        .filter(event => !bookedEventIds.includes(event._id))
+        .filter((event: any) => !bookedEventIds.includes(event._id))
       setRecommendedEvents(availableEvents.slice(0, 2))
     } catch (error: any) {
       if (error.response?.status === 401) {
