@@ -8,11 +8,16 @@ export class EmailService {
   private gmailTransporter;
 
   constructor(private configService: ConfigService) {
-    console.log('📧 Initializing email service with Brevo API and Gmail backup');
-    console.log('📧 Brevo API Key:', this.configService.get('BREVO_API_KEY') ? 'Set' : 'Not set');
-    
+    console.log(
+      '📧 Initializing email service with Brevo API and Gmail backup',
+    );
+    console.log(
+      '📧 Brevo API Key:',
+      this.configService.get('BREVO_API_KEY') ? 'Set' : 'Not set',
+    );
+
     // Gmail backup transporter
-    this.gmailTransporter = nodemailer.createTransporter({
+    this.gmailTransporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: this.configService.get('EMAIL_USER'),
@@ -40,7 +45,11 @@ export class EmailService {
         </div>
       `;
 
-      const result = await this.sendBrevoEmail(email, 'EventAddis - Verify Your Email', htmlContent);
+      const result = await this.sendBrevoEmail(
+        email,
+        'EventAddis - Verify Your Email',
+        htmlContent,
+      );
       console.log('✅ Verification email sent successfully');
       console.log('📧 Brevo response body:', result.body);
     } catch (error) {
@@ -68,12 +77,20 @@ export class EmailService {
     // Try Gmail first (more reliable)
     try {
       console.log('📧 Trying Gmail for password reset email to:', email);
-      await this.sendGmailEmail(email, 'EventAddis - Password Reset', htmlContent);
+      await this.sendGmailEmail(
+        email,
+        'EventAddis - Password Reset',
+        htmlContent,
+      );
       console.log('✅ Password reset email sent via Gmail');
     } catch (gmailError) {
       console.log('⚠️ Gmail failed, trying Brevo:', gmailError.message);
       try {
-        const result = await this.sendBrevoEmail(email, 'EventAddis - Password Reset', htmlContent);
+        const result = await this.sendBrevoEmail(
+          email,
+          'EventAddis - Password Reset',
+          htmlContent,
+        );
         console.log('✅ Password reset email sent via Brevo:', result.body);
       } catch (brevoError) {
         console.error('💥 Both Gmail and Brevo failed:', brevoError);
@@ -94,11 +111,16 @@ export class EmailService {
     }
   }
 
-  private async sendBrevoEmail(to: string, subject: string, htmlContent: string, fromName = 'EventAddis') {
+  private async sendBrevoEmail(
+    to: string,
+    subject: string,
+    htmlContent: string,
+    fromName = 'EventAddis',
+  ) {
     const apiInstance = new brevo.TransactionalEmailsApi();
     apiInstance.setApiKey(
       brevo.TransactionalEmailsApiApiKeys.apiKey,
-      this.configService.get('BREVO_API_KEY') || ''
+      this.configService.get('BREVO_API_KEY') || '',
     );
 
     const sendSmtpEmail = new brevo.SendSmtpEmail();
@@ -114,7 +136,7 @@ export class EmailService {
       to: sendSmtpEmail.to,
       sender: sendSmtpEmail.sender,
       subject: sendSmtpEmail.subject,
-      apiKey: this.configService.get('BREVO_API_KEY') ? 'Set' : 'Not set'
+      apiKey: this.configService.get('BREVO_API_KEY') ? 'Set' : 'Not set',
     });
 
     return await apiInstance.sendTransacEmail(sendSmtpEmail);
