@@ -44,7 +44,7 @@ export default function DiscoverPage() {
         params.append('minPrice', '1')
       }
       
-      const response = await eventsAPI.getPublicEvents(`?${params.toString()}`)
+      const response = await eventsAPI.getAllEvents(Object.fromEntries(params))
       setEvents(response.data.events || [])
     } catch (error: any) {
       console.error('Failed to fetch events:', error)
