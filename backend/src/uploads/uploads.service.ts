@@ -13,6 +13,8 @@ export class UploadsService {
   }
 
   async uploadImage(file: Express.Multer.File): Promise<string> {
+    console.log('Uploading image:', file.originalname, 'Size:', file.size);
+    
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
@@ -26,10 +28,13 @@ export class UploadsService {
         },
         (error, result) => {
           if (error) {
+            console.error('Cloudinary upload error:', error);
             reject(error);
           } else if (result) {
+            console.log('Upload successful:', result.secure_url);
             resolve(result.secure_url);
           } else {
+            console.error('Upload failed: No result');
             reject(new Error('Upload failed'));
           }
         },

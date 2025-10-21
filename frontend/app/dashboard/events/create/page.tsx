@@ -10,6 +10,7 @@ import Link from 'next/link';
 export default function CreateEventPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -25,6 +26,47 @@ export default function CreateEventPage() {
     registrationDeadline: '',
     image: null as File | null
   });
+
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      const img = new Image();
+      
+      img.onload = () => {
+        const maxWidth = 800;
+        const maxHeight = 600;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          const compressedFile = new File([blob!], file.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+          });
+          resolve(compressedFile);
+        }, 'image/jpeg', 0.8);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
 
   const categories = [
     { value: 'technology', label: 'Technology' },
@@ -47,12 +89,18 @@ export default function CreateEventPage() {
     try {
       let bannerUrl = '';
       
-      // Upload image if provided
+      // Upload image to Cloudinary if selected
       if (formData.image) {
-        const imageFormData = new FormData();
-        imageFormData.append('file', formData.image);
+        // Compress image if it's too large
+        let fileToUpload = formData.image;
+        if (formData.image.size > 1024 * 1024) { // If larger than 1MB
+          fileToUpload = await compressImage(formData.image);
+        }
         
-        const uploadResponse = await fetch('/api/uploads', {
+        const imageFormData = new FormData();
+        imageFormData.append('file', fileToUpload);
+        
+        const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/uploads`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -63,6 +111,8 @@ export default function CreateEventPage() {
         if (uploadResponse.ok) {
           const uploadResult = await uploadResponse.json();
           bannerUrl = uploadResult.url;
+        } else {
+          throw new Error('Image too large or upload failed');
         }
       }
 
@@ -324,14 +374,35 @@ export default function CreateEventPage() {
               
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-muted rounded-lg p-6 text-center">
-                  <Image className="w-12 h-12 mx-auto mb-4 text-muted" />
-                  <p className="text-muted mb-2">Upload event image</p>
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-4" />
+                  ) : (
+                    <>
+                      <Image className="w-12 h-12 mx-auto mb-4 text-muted" />
+                      <p className="text-muted mb-2">Upload event image</p>
+                    </>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
                     id="image-upload"
-                    onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      if (file) {
+                        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                          toast.error('Image must be smaller than 10MB');
+                          return;
+                        }
+                        setFormData({ ...formData, image: file });
+                        const reader = new FileReader();
+                        reader.onload = () => setImagePreview(reader.result as string);
+                        reader.readAsDataURL(file);
+                      } else {
+                        setFormData({ ...formData, image: null });
+                        setImagePreview('');
+                      }
+                    }}
                   />
                   <label
                     htmlFor="image-upload"

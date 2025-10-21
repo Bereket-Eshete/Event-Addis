@@ -47,7 +47,6 @@ export const useAuth = create<AuthState>()(
         }
 
         try {
-          set({ isLoading: true })
           const response = await profileAPI.getProfile()
           const userData = response.data
           set({ 
@@ -61,13 +60,10 @@ export const useAuth = create<AuthState>()(
             isAuthenticated: true 
           })
         } catch (error) {
-          // Token is invalid or user doesn't exist
           if (typeof window !== 'undefined') {
             localStorage.removeItem('token')
           }
           set({ user: null, token: null, isAuthenticated: false })
-        } finally {
-          set({ isLoading: false })
         }
       },
     }),
