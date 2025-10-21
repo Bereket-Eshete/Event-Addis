@@ -1,11 +1,22 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Eye, EyeOff, Lock, Calendar, CheckCircle, AlertCircle } from 'lucide-react'
 import { authAPI } from '@/lib/api'
 import toast from 'react-hot-toast'
+
+function TokenHandler({ onTokenReceived }: { onTokenReceived: (token: string | null) => void }) {
+  const searchParams = useSearchParams()
+  
+  useEffect(() => {
+    const token = searchParams.get('token')
+    onTokenReceived(token)
+  }, [searchParams, onTokenReceived])
+  
+  return null
+}
 
 export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -13,16 +24,16 @@ export default function ResetPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [token, setToken] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
   })
 
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const token = searchParams.get('token')
 
   useEffect(() => {
+    if (token === null) return // Still loading
     if (!token) {
       setError('Invalid or missing reset token')
     }
@@ -141,8 +152,12 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <>
+      <Suspense fallback={null}>
+        <TokenHandler onTokenReceived={setToken} />
+      </Suspense>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
@@ -266,7 +281,8 @@ export default function ResetPasswordPage() {
             Back to sign in
           </Link>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

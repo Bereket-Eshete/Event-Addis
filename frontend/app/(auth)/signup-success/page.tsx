@@ -1,16 +1,31 @@
 'use client'
 
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Calendar, CheckCircle } from 'lucide-react'
 
-export default function SignupSuccessPage() {
+function EmailHandler({ onEmailReceived }: { onEmailReceived: (email: string | null) => void }) {
   const searchParams = useSearchParams()
-  const email = searchParams.get('email')
+  
+  useEffect(() => {
+    const email = searchParams.get('email')
+    onEmailReceived(email)
+  }, [searchParams, onEmailReceived])
+  
+  return null
+}
+
+export default function SignupSuccessPage() {
+  const [email, setEmail] = useState<string | null>(null)
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4" style={{backgroundColor: 'var(--bg)'}}>
-      <div className="max-w-md w-full space-y-8 text-center">
+    <>
+      <Suspense fallback={null}>
+        <EmailHandler onEmailReceived={setEmail} />
+      </Suspense>
+      <div className="min-h-screen flex items-center justify-center py-12 px-4" style={{backgroundColor: 'var(--bg)'}}>
+        <div className="max-w-md w-full space-y-8 text-center">
         <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary">
             <Calendar className="h-6 w-6 text-white" />
@@ -52,7 +67,8 @@ export default function SignupSuccessPage() {
             </Link>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

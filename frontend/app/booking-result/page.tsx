@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Loader } from "lucide-react";
 
-export default function BookingResultPage() {
+function PaymentHandler({ onStatusChange }: { onStatusChange: (status: string) => void }) {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     const trxRef = searchParams.get("trx_ref");
@@ -17,20 +15,18 @@ export default function BookingResultPage() {
     console.log('Full URL:', window.location.href);
 
     if (trxRef && paymentStatus === "success") {
-      // Verify payment with backend
       verifyPayment(trxRef);
     } else if (paymentStatus === "failed" || paymentStatus === "cancelled") {
-      setStatus("failed");
+      onStatusChange("failed");
     } else {
-      // If no status param, try to verify anyway if we have trxRef
       if (trxRef) {
         console.log('No status param, but have trxRef, attempting verification');
         verifyPayment(trxRef);
       } else {
-        setStatus("failed");
+        onStatusChange("failed");
       }
     }
-  }, [searchParams]);
+  }, [searchParams, onStatusChange]);
 
   const verifyPayment = async (txRef: string) => {
     try {
@@ -49,16 +45,23 @@ export default function BookingResultPage() {
       
       if (response.ok || response.status === 201) {
         console.log('Payment verification successful!');
-        setStatus("success");
+        onStatusChange("success");
       } else {
         console.error('Verification failed with status:', response.status);
-        setStatus("failed");
+        onStatusChange("failed");
       }
     } catch (error) {
       console.error('Payment verification failed:', error);
-      setStatus("failed");
+      onStatusChange("failed");
     }
   };
+
+  return null;
+}
+
+export default function BookingResultPage() {
+  const router = useRouter();
+  const [status, setStatus] = useState("loading");
 
   const handleContinue = () => {
     router.push("/user/tickets");
@@ -70,13 +73,18 @@ export default function BookingResultPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
-          <h2 className="text-xl font-semibold text-primary mb-2">Processing Payment</h2>
-          <p className="text-muted">Please wait while we verify your payment...</p>
+      <>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center">
+            <Loader className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+            <h2 className="text-xl font-semibold text-primary mb-2">Processing Payment</h2>
+            <p className="text-muted">Please wait while we verify your payment...</p>
+          </div>
         </div>
-      </div>
+        <Suspense fallback={null}>
+          <PaymentHandler onStatusChange={setStatus} />
+        </Suspense>
+      </>
     );
   }
 
