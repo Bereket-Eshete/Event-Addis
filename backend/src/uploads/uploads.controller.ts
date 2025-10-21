@@ -14,12 +14,17 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
+  @Post('test')
+  async testUpload() {
+    return { message: 'Upload endpoint is working', timestamp: new Date().toISOString() };
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       limits: {
-        fileSize: 5 * 1024 * 1024, // limits images size more than 5MB.
+        fileSize: 10 * 1024 * 1024, // limits images size more than 10MB.
       },
       fileFilter: (req, file, cb) => {
         //check the images format before accepting

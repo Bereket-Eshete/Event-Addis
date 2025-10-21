@@ -164,9 +164,20 @@ export default function EventsPage() {
             key={event._id}
             className="p-6 transition-shadow card hover:shadow-lg"
           >
-            <div className="flex items-center justify-between">
-              {/* Event Info */}
-              <div className="flex-1">
+            <div className="flex items-start justify-between">
+              {/* Event Image & Info */}
+              <div className="flex flex-1 space-x-4">
+                {event.bannerUrl && (
+                  <img 
+                    src={event.bannerUrl} 
+                    alt={event.title}
+                    className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-semibold text-primary">
                     {event.title}
@@ -200,6 +211,7 @@ export default function EventsPage() {
                     <span>{event.price || 0} ETB</span>
                   </div>
                 </div>
+              </div>
               </div>
 
               {/* Actions */}
