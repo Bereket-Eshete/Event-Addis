@@ -12,12 +12,12 @@ export class DashboardService {
   ) {}
 
   async getOrganizerStats(organizerId: string) {
-    console.log('Getting organizer stats for:', organizerId);
+
     
     // Try both string and ObjectId formats
     const totalEventsString = await this.eventModel.countDocuments({ organizerId: organizerId });
     const totalEventsObjectId = await this.eventModel.countDocuments({ organizerId: new Types.ObjectId(organizerId) });
-    console.log('Total events (string):', totalEventsString, 'Total events (ObjectId):', totalEventsObjectId);
+
     
     const totalEvents = Math.max(totalEventsString, totalEventsObjectId);
     const organizerQuery = totalEventsString > 0 ? organizerId : new Types.ObjectId(organizerId);
@@ -27,10 +27,10 @@ export class DashboardService {
       status: 'published',
       startAt: { $gte: new Date() }
     });
-    console.log('Active events found:', activeEvents);
+
     
     const eventIds = await this.eventModel.find({ organizerId: organizerQuery }).select('_id');
-    console.log('Event IDs found:', eventIds.map(e => e._id));
+
     const eventIdArray = eventIds.map(event => event._id);
     const eventIdStringArray = eventIds.map(event => (event._id as Types.ObjectId).toString());
     
@@ -40,7 +40,7 @@ export class DashboardService {
         { eventId: { $in: eventIdStringArray } }
       ]
     });
-    console.log('Total bookings found:', totalBookings);
+
     
     const totalRevenue = await this.bookingModel.aggregate([
       {
@@ -59,9 +59,7 @@ export class DashboardService {
         }
       }
     ]);
-    console.log('Total revenue aggregate result:', totalRevenue);
     const revenueAmount = totalRevenue.length > 0 ? (totalRevenue[0]?.total || 0) : 0;
-    console.log('Final revenue amount:', revenueAmount);
 
     return {
       totalEvents,

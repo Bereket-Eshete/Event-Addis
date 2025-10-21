@@ -16,18 +16,16 @@ export class DashboardController {
 
   @Get('organizer/stats')
   async getOrganizerStats(@Req() req) {
-    console.log('Organizer stats request - User:', req.user);
+
     if (req.user.role !== UserRole.ORGANIZER) {
       return { totalEvents: 0, activeEvents: 0, totalBookings: 0, totalRevenue: 0 };
     }
-    const stats = await this.dashboardService.getOrganizerStats(req.user.userId);
-    console.log('Stats being returned to frontend:', stats);
-    return stats;
+    return this.dashboardService.getOrganizerStats(req.user.userId);
   }
 
   @Get('organizer/events')
   async getOrganizerEvents(@Req() req, @Query() query: any) {
-    console.log('Organizer events request - User:', req.user);
+
     if (req.user.role !== UserRole.ORGANIZER) {
       return { events: [], total: 0, page: 1, pages: 0 };
     }
@@ -36,7 +34,7 @@ export class DashboardController {
 
   @Get('organizer/bookings')
   async getOrganizerBookings(@Req() req, @Query() query: any) {
-    console.log('Organizer bookings request - User:', req.user);
+
     if (req.user.role !== UserRole.ORGANIZER) {
       return { bookings: [], total: 0, page: 1, pages: 0 };
     }
@@ -45,7 +43,7 @@ export class DashboardController {
 
   @Get('organizer/payments')
   async getOrganizerPayments(@Req() req, @Query() query: any) {
-    console.log('Organizer payments request - User:', req.user);
+
     if (req.user.role !== UserRole.ORGANIZER) {
       return { payments: [], total: 0, page: 1, pages: 0 };
     }
@@ -54,7 +52,7 @@ export class DashboardController {
 
   @Get('organizer/analytics')
   async getOrganizerAnalytics(@Req() req, @Query('period') period: string) {
-    console.log('Organizer analytics request - User:', req.user);
+
     if (req.user.role !== UserRole.ORGANIZER) {
       return { bookingsOverTime: [], revenueByEvent: [], period };
     }
