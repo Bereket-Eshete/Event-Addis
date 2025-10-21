@@ -4,17 +4,9 @@ import * as brevo from '@getbrevo/brevo';
 
 @Injectable()
 export class EmailService {
-  private apiInstance;
-
   constructor(private configService: ConfigService) {
     console.log('📧 Initializing email service with Brevo API');
     console.log('📧 Brevo API Key:', this.configService.get('BREVO_API_KEY') ? 'Set' : 'Not set');
-    
-    this.apiInstance = new brevo.TransactionalEmailsApi();
-    this.apiInstance.setApiKey(
-      brevo.TransactionalEmailsApiApiKeys.apiKey,
-      this.configService.get('BREVO_API_KEY')
-    );
   }
 
   async sendVerificationEmail(email: string, token: string) {
@@ -67,7 +59,6 @@ export class EmailService {
       const result = await this.sendBrevoEmail(email, 'EventAddis - Password Reset', htmlContent);
       console.log('✅ Password reset email sent successfully');
       console.log('📧 Brevo response body:', result.body);
-      console.log('📧 Brevo response status:', result.response?.status);
     } catch (error) {
       console.error('💥 Failed to send password reset email:', error);
       throw error;
@@ -87,11 +78,17 @@ export class EmailService {
   }
 
   private async sendBrevoEmail(to: string, subject: string, htmlContent: string, fromName = 'EventAddis') {
+    const apiInstance = new brevo.TransactionalEmailsApi();
+    apiInstance.setApiKey(
+      brevo.TransactionalEmailsApiApiKeys.apiKey,
+      this.configService.get('BREVO_API_KEY') || ''
+    );
+
     const sendSmtpEmail = new brevo.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: to }];
     sendSmtpEmail.sender = {
       name: fromName,
-      email: this.configService.get('EMAIL_USER'),
+      email: this.configService.get('EMAIL_USER') || '',
     };
     sendSmtpEmail.subject = subject;
     sendSmtpEmail.htmlContent = htmlContent;
@@ -99,9 +96,10 @@ export class EmailService {
     console.log('📧 Sending email with config:', {
       to: sendSmtpEmail.to,
       sender: sendSmtpEmail.sender,
-      subject: sendSmtpEmail.subject
+      subject: sendSmtpEmail.subject,
+      apiKey: this.configService.get('BREVO_API_KEY') ? 'Set' : 'Not set'
     });
 
-    return await this.apiInstance.sendTransacEmail(sendSmtpEmail);
+    return await apiInstance.sendTransacEmail(sendSmtpEmail);
   }
 }
