@@ -192,58 +192,58 @@ export default function EventsPage() {
             key={event._id}
             className="p-6 transition-shadow card hover:shadow-lg"
           >
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
               {/* Event Image & Info */}
-              <div className="flex flex-1 space-x-4">
+              <div className="flex flex-col sm:flex-row flex-1 space-y-4 sm:space-y-0 sm:space-x-4">
                 {event.bannerUrl && (
                   <img 
                     src={event.bannerUrl} 
                     alt={event.title}
-                    className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
+                    className="w-full sm:w-24 h-48 sm:h-24 object-cover rounded-lg flex-shrink-0"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
                 )}
                 <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xl font-semibold text-primary">
-                    {event.title}
-                  </h3>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                      {event.category || 'Event'}
-                    </span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 space-y-2 sm:space-y-0">
+                    <h3 className="text-lg sm:text-xl font-semibold text-primary">
+                      {event.title}
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+                        {event.category || 'Event'}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-4">
-                  <div className="flex items-center text-muted">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>
-                      {new Date(event.startAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center text-muted">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    <span>{event.venue}</span>
-                  </div>
-                  <div className="flex items-center text-muted">
-                    <Users className="w-4 h-4 mr-2" />
-                    <span>
-                      {event.capacity || 0} capacity
-                    </span>
-                  </div>
-                  <div className="flex items-center text-muted">
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    <span>{event.price || 0} ETB</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mt-4">
+                    <div className="flex items-center text-muted text-sm">
+                      <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">
+                        {new Date(event.startAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-muted text-sm">
+                      <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{event.venue}</span>
+                    </div>
+                    <div className="flex items-center text-muted text-sm">
+                      <Users className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span>
+                        {event.capacity || 0} capacity
+                      </span>
+                    </div>
+                    <div className="flex items-center text-muted text-sm">
+                      <DollarSign className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span>{event.price || 0} ETB</span>
+                    </div>
                   </div>
                 </div>
-              </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center space-x-2 ml-6">
+              <div className="flex items-center justify-end space-x-2 lg:ml-6">
                 <Link href={`/dashboard/events/${event._id}`} className="p-2 transition-colors rounded-lg text-primary hover:bg-surface">
                   <Eye className="w-5 h-5" />
                 </Link>

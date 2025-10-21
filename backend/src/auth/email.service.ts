@@ -1,37 +1,43 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as brevo from '@getbrevo/brevo';
 
 @Injectable()
 export class EmailService {
   constructor(private configService: ConfigService) {
-    console.log('📧 Initializing email service with Brevo API');
-    console.log('📧 Brevo API Key:', this.configService.get('BREVO_API_KEY') ? 'Set' : 'Not set');
+    console.log('📧 Initializing email service with Web3Forms');
   }
 
-  // Helper function to send email via Brevo API (copied from working example)
-  private async sendBrevoEmail(
+  private async sendWeb3FormsEmail(
     to: string,
     subject: string,
-    htmlContent: string,
-    fromName = 'EventAddis'
+    html: string
   ) {
-    const apiInstance = new brevo.TransactionalEmailsApi();
-    apiInstance.setApiKey(
-      brevo.TransactionalEmailsApiApiKeys.apiKey,
-      this.configService.get('BREVO_API_KEY') || ''
-    );
-
-    const sendSmtpEmail = new brevo.SendSmtpEmail();
-    sendSmtpEmail.to = [{ email: to }];
-    sendSmtpEmail.sender = {
-      name: fromName,
-      email: this.configService.get('EMAIL_FROM') || this.configService.get('EMAIL_USER') || '89338a001@smtp-brevo.com',
-    };
-    sendSmtpEmail.subject = subject;
-    sendSmtpEmail.htmlContent = htmlContent;
-
-    return await apiInstance.sendTransacEmail(sendSmtpEmail);
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          access_key: 'c8f2e4d6-1a3b-4c5e-9f8a-2b4c6d8e0f1a',
+          email: to,
+          subject: subject,
+          message: html,
+          from_name: 'EventAddis Team',
+          replyto: 'noreply@eventaddis.com',
+        }),
+      });
+      
+      const result = await response.json();
+      if (result.success) {
+        console.log('✅ Email sent successfully to:', to);
+        return { success: true };
+      }
+      throw new Error(result.message || 'Email send failed');
+    } catch (error) {
+      console.error('❌ Email send failed:', error.message);
+      throw error;
+    }
   }
 
   async sendVerificationEmail(email: string, token: string) {
@@ -51,15 +57,15 @@ export class EmailService {
     `;
 
     try {
-      await this.sendBrevoEmail(
+      await this.sendWeb3FormsEmail(
         email,
         'Email Verification - EventAddis',
         htmlContent
       );
       return { success: true };
     } catch (error) {
-      console.error('Email send error:', error);
-      return { success: false, error: error.message };
+      console.error('Email send error:', error.message);
+      return { success: false, error: 'Email service temporarily unavailable' };
     }
   }
 
@@ -80,25 +86,25 @@ export class EmailService {
     `;
 
     try {
-      await this.sendBrevoEmail(
+      await this.sendWeb3FormsEmail(
         email,
         'Password Reset - EventAddis',
         htmlContent
       );
       return { success: true };
     } catch (error) {
-      console.error('Email send error:', error);
-      return { success: false, error: error.message };
+      console.error('Email send error:', error.message);
+      return { success: false, error: 'Email service temporarily unavailable' };
     }
   }
 
   async sendEmail(to: string, subject: string, html: string) {
     try {
-      await this.sendBrevoEmail(to, subject, html);
+      await this.sendWeb3FormsEmail(to, subject, html);
       return { success: true };
     } catch (error) {
-      console.error('Email send error:', error);
-      return { success: false, error: error.message };
+      console.error('Email send error:', error.message);
+      return { success: false, error: 'Email service temporarily unavailable' };
     }
   }
 }

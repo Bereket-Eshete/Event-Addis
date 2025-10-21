@@ -193,11 +193,11 @@ export default function DashboardPage() {
             recentEvents.map((event: any) => (
               <div
                 key={event._id}
-                className="flex items-center justify-between p-4 transition-colors border rounded-lg border-muted hover:bg-surface/50"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 transition-colors border rounded-lg border-muted hover:bg-surface/50 space-y-3 sm:space-y-0"
               >
                 <div className="flex-1">
                   <h3 className="font-semibold text-primary">{event.title}</h3>
-                  <div className="flex items-center mt-1 space-x-4 text-sm text-muted">
+                  <div className="flex flex-col sm:flex-row sm:items-center mt-1 space-y-1 sm:space-y-0 sm:space-x-4 text-sm text-muted">
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
                       {new Date(event.startAt).toLocaleDateString()}
@@ -209,7 +209,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-6 text-sm">
+                <div className="flex items-center justify-between sm:justify-end space-x-4 sm:space-x-6 text-sm">
                   <div className="text-center">
                     <div className="flex items-center text-muted">
                       <Users className="w-4 h-4 mr-1" />
