@@ -142,8 +142,8 @@ export default function UserDashboardPage() {
             </div>
           ) : (
             upcomingEvents.map((event: any) => (
-              <div key={event._id} className="flex items-center space-x-4 p-4 border border-muted rounded-lg hover:bg-surface/50 transition-colors">
-                <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden">
+              <div key={event._id} className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 border border-muted rounded-lg hover:bg-surface/50 transition-colors">
+                <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                   <div className="w-full h-full bg-primary/20 flex items-center justify-center">
                     <Calendar className="h-6 w-6 text-primary" />
                   </div>
@@ -151,21 +151,21 @@ export default function UserDashboardPage() {
                 
                 <div className="flex-1">
                   <h3 className="font-semibold text-primary">{event.eventId?.title}</h3>
-                  <div className="flex items-center space-x-4 mt-1 text-sm text-muted">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-1 space-y-1 sm:space-y-0 text-sm text-muted">
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {new Date(event.eventId?.startAt).toLocaleDateString()} at {new Date(event.eventId?.startAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
+                      <span className="truncate">{new Date(event.eventId?.startAt).toLocaleDateString()} at {new Date(event.eventId?.startAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                     <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {event.eventId?.venue}
+                      <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                      <span className="truncate">{event.eventId?.venue}</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="text-right">
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center sm:text-right">
                   <div className="text-sm font-medium text-primary">{event.totalAmount} ETB</div>
-                  <div className={`text-xs px-2 py-1 rounded-full mt-1 ${
+                  <div className={`text-xs px-2 py-1 rounded-full mt-0 sm:mt-1 ${
                     event.status === 'confirmed' 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-yellow-100 text-yellow-800'

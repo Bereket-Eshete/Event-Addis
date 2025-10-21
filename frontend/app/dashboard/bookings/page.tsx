@@ -263,8 +263,8 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      {/* Bookings Table */}
-      <div className="overflow-hidden card">
+      {/* Bookings Table - Desktop */}
+      <div className="hidden overflow-hidden card lg:block">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader className="w-8 h-8 animate-spin text-primary" />
@@ -341,6 +341,62 @@ export default function BookingsPage() {
               </tbody>
             </table>
           </div>
+        )}
+      </div>
+
+      {/* Bookings Cards - Mobile & Tablet */}
+      <div className="space-y-4 lg:hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted">Loading bookings...</span>
+          </div>
+        ) : (
+          filteredBookings.map((booking: any) => (
+            <div key={booking._id} className="p-4 card">
+              <div className="flex flex-col space-y-3">
+                {/* Attendee Info */}
+                <div>
+                  <div className="font-medium text-primary">
+                    {booking.userId?.fullName || 'Unknown User'}
+                  </div>
+                  <div className="flex items-center mt-1 text-sm text-muted">
+                    <Mail className="w-3 h-3 mr-1" />
+                    <span className="truncate">{booking.userId?.email || 'No email'}</span>
+                  </div>
+                </div>
+
+                {/* Event Info */}
+                <div>
+                  <div className="font-medium text-primary">
+                    {booking.eventId?.title || 'Unknown Event'}
+                  </div>
+                  <div className="text-sm text-muted">
+                    {booking.eventId?.venue || 'No location'}
+                  </div>
+                </div>
+
+                {/* Amount, Status, Date */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <span className="font-medium text-primary">
+                      {booking.totalAmount || 0} ETB
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(
+                        booking.status
+                      )}`}
+                    >
+                      {booking.status}
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted">
+                    {new Date(booking.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
