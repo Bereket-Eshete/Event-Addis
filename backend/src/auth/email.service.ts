@@ -37,7 +37,8 @@ export class EmailService {
       `;
 
       const result = await this.sendBrevoEmail(email, 'EventAddis - Verify Your Email', htmlContent);
-      console.log('✅ Verification email sent successfully:', result.response?.data?.messageId);
+      console.log('✅ Verification email sent successfully');
+      console.log('📧 Brevo response body:', result.body);
     } catch (error) {
       console.error('💥 Failed to send verification email:', error);
       throw error;
@@ -64,7 +65,9 @@ export class EmailService {
       `;
 
       const result = await this.sendBrevoEmail(email, 'EventAddis - Password Reset', htmlContent);
-      console.log('✅ Password reset email sent successfully:', result.response?.data?.messageId);
+      console.log('✅ Password reset email sent successfully');
+      console.log('📧 Brevo response body:', result.body);
+      console.log('📧 Brevo response status:', result.response?.status);
     } catch (error) {
       console.error('💥 Failed to send password reset email:', error);
       throw error;
@@ -75,7 +78,8 @@ export class EmailService {
     try {
       console.log('📧 Sending email to:', to, 'Subject:', subject);
       const result = await this.sendBrevoEmail(to, subject, html);
-      console.log('✅ Email sent successfully:', result.response?.data?.messageId);
+      console.log('✅ Email sent successfully');
+      console.log('📧 Brevo response body:', result.body);
     } catch (error) {
       console.error('💥 Failed to send email:', error);
       throw error;
@@ -91,6 +95,12 @@ export class EmailService {
     };
     sendSmtpEmail.subject = subject;
     sendSmtpEmail.htmlContent = htmlContent;
+
+    console.log('📧 Sending email with config:', {
+      to: sendSmtpEmail.to,
+      sender: sendSmtpEmail.sender,
+      subject: sendSmtpEmail.subject
+    });
 
     return await this.apiInstance.sendTransacEmail(sendSmtpEmail);
   }
