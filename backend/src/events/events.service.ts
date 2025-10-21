@@ -101,6 +101,11 @@ export class EventsService {
   }
 
   async findOne(id: string) {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid event ID format');
+    }
+
     const event = await this.eventModel
       .findById(id)
       .populate('organizerId', 'fullName organizationName email contactNumber')
@@ -114,6 +119,10 @@ export class EventsService {
   }
 
   async update(id: string, updateEventDto: UpdateEventDto, userId: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid event ID format');
+    }
+
     const event = await this.eventModel.findById(id);
 
     if (!event) {
@@ -133,6 +142,10 @@ export class EventsService {
   }
 
   async remove(id: string, userId: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid event ID format');
+    }
+
     const event = await this.eventModel.findById(id);
 
     if (!event) {
