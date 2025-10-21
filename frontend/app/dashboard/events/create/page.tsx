@@ -31,7 +31,7 @@ export default function CreateEventPage() {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
-      const img = new Image();
+      const img = new window.Image();
       
       img.onload = () => {
         const maxWidth = 800;
@@ -58,7 +58,7 @@ export default function CreateEventPage() {
         canvas.toBlob((blob) => {
           const compressedFile = new File([blob!], file.name, {
             type: 'image/jpeg',
-            lastModified: Date.now()
+            lastModified: new Date().getTime()
           });
           resolve(compressedFile);
         }, 'image/jpeg', 0.8);

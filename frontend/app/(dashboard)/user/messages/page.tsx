@@ -6,7 +6,7 @@ import { dashboardAPI } from '@/lib/api';
 import { toast } from 'react-hot-toast';
 
 export default function MessagesPage() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,10 +24,10 @@ export default function MessagesPage() {
     }
   };
 
-  const handleMarkAsRead = async (messageId) => {
+  const handleMarkAsRead = async (messageId: string) => {
     try {
       await dashboardAPI.markMessageAsRead(messageId);
-      setMessages(prev => prev.map(msg => 
+      setMessages(prev => prev.map((msg: any) => 
         msg._id === messageId ? { ...msg, read: true } : msg
       ));
     } catch (error) {
@@ -35,10 +35,10 @@ export default function MessagesPage() {
     }
   };
 
-  const getTimeAgo = (date) => {
+  const getTimeAgo = (date: string) => {
     const now = new Date();
     const messageDate = new Date(date);
-    const diffInHours = Math.floor((now - messageDate) / (1000 * 60 * 60));
+    const diffInHours = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60 * 60));
     
     if (diffInHours < 1) return 'Just now';
     if (diffInHours < 24) return `${diffInHours} hours ago`;
@@ -59,7 +59,7 @@ export default function MessagesPage() {
       <h1 className="text-2xl font-bold text-primary mb-6">Messages</h1>
       
       <div className="space-y-2">
-        {messages.map((message) => (
+        {messages.map((message: any) => (
           <div 
             key={message._id} 
             onClick={() => !message.read && handleMarkAsRead(message._id)}

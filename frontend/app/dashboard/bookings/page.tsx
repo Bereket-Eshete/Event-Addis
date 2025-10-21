@@ -19,7 +19,7 @@ export default function BookingsPage() {
   const [selectedEvent, setSelectedEvent] = useState("All Events");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [checkInFilter, setCheckInFilter] = useState("all");
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
 

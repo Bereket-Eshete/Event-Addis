@@ -33,7 +33,7 @@ export default function BookingModal({ event, isOpen, onClose }: BookingModalPro
         toast.success("Booking confirmed successfully!");
         onClose();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to create booking");
     } finally {
       setLoading(false);

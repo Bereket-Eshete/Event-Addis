@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import ReceiptModal from '@/components/ui/ReceiptModal';
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState([]);
+  const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
@@ -48,7 +48,7 @@ export default function PaymentsPage() {
       </div>
       
       <div className="space-y-4">
-        {payments.map((payment) => (
+        {payments.map((payment: any) => (
           <div key={payment._id} className="bg-surface border border-muted rounded-lg p-6">
             <div className="flex justify-between items-start mb-4">
               <div>
