@@ -32,27 +32,44 @@ export default function DashboardPage() {
     fetchDashboardData();
   }, []);
 
+  // Refresh data when window gains focus (when returning from create page)
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchDashboardData();
+    };
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchDashboardData();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const fetchDashboardData = async () => {
     try {
-      console.log('Current user:', user);
-      console.log('Token from localStorage:', localStorage.getItem('token'));
-      
-      // First check user info
-      const userInfoResponse = await dashboardAPI.getUserInfo();
-      console.log('User info from backend:', userInfoResponse.data);
-      
       const [statsResponse, eventsResponse] = await Promise.all([
         dashboardAPI.getOrganizerStats(),
         dashboardAPI.getOrganizerEvents({ limit: 5 })
       ]);
       
-      console.log('Stats response from backend:', statsResponse.data);
-      console.log('Revenue value:', statsResponse.data.totalRevenue, 'Type:', typeof statsResponse.data.totalRevenue);
-      
       setStats(statsResponse.data);
       setRecentEvents(eventsResponse.data.events);
     } catch (error: any) {
-      console.error('Dashboard error details:', error.response?.data || error.message);
       if (error.response?.status !== 401) {
         toast.error('Failed to load dashboard data');
       }

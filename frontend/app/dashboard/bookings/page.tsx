@@ -27,6 +27,34 @@ export default function BookingsPage() {
     fetchBookings();
   }, [pagination.page]);
 
+  // Auto-refresh functionality
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchBookings();
+    };
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchBookings();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchBookings();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const fetchBookings = async () => {
     try {
       setLoading(true);

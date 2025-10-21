@@ -133,7 +133,11 @@ export default function CreateEventPage() {
 
       await eventsAPI.createEvent(eventData);
       toast.success('Event created successfully!');
-      router.push('/dashboard/events');
+      // Refresh dashboard data by triggering a window focus event
+      setTimeout(() => {
+        window.dispatchEvent(new Event('focus'));
+      }, 100);
+      router.push('/dashboard');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to create event');
     } finally {

@@ -12,15 +12,10 @@ export class DashboardService {
   ) {}
 
   async getOrganizerStats(organizerId: string) {
-
+    // Convert to ObjectId for consistent querying
+    const organizerQuery = new Types.ObjectId(organizerId);
     
-    // Try both string and ObjectId formats
-    const totalEventsString = await this.eventModel.countDocuments({ organizerId: organizerId });
-    const totalEventsObjectId = await this.eventModel.countDocuments({ organizerId: new Types.ObjectId(organizerId) });
-
-    
-    const totalEvents = Math.max(totalEventsString, totalEventsObjectId);
-    const organizerQuery = totalEventsString > 0 ? organizerId : new Types.ObjectId(organizerId);
+    const totalEvents = await this.eventModel.countDocuments({ organizerId: organizerQuery });
     
     const activeEvents = await this.eventModel.countDocuments({ 
       organizerId: organizerQuery, 
@@ -30,25 +25,16 @@ export class DashboardService {
 
     
     const eventIds = await this.eventModel.find({ organizerId: organizerQuery }).select('_id');
-
     const eventIdArray = eventIds.map(event => event._id);
-    const eventIdStringArray = eventIds.map(event => (event._id as Types.ObjectId).toString());
     
     const totalBookings = await this.bookingModel.countDocuments({
-      $or: [
-        { eventId: { $in: eventIdArray } },
-        { eventId: { $in: eventIdStringArray } }
-      ]
+      eventId: { $in: eventIdArray }
     });
 
-    
     const totalRevenue = await this.bookingModel.aggregate([
       {
         $match: {
-          $or: [
-            { eventId: { $in: eventIdArray } },
-            { eventId: { $in: eventIdStringArray } }
-          ],
+          eventId: { $in: eventIdArray },
           status: BookingStatus.CONFIRMED
         }
       },
@@ -72,9 +58,8 @@ export class DashboardService {
   async getOrganizerEvents(organizerId: string, query: any) {
     const { page = 1, limit = 10, status } = query;
     
-    // Use the same organizerId format as determined in getOrganizerStats
-    const totalEventsString = await this.eventModel.countDocuments({ organizerId: organizerId });
-    const organizerQuery = totalEventsString > 0 ? organizerId : new Types.ObjectId(organizerId);
+    // Convert to ObjectId for consistent querying
+    const organizerQuery = new Types.ObjectId(organizerId);
     
     const filter: any = { organizerId: organizerQuery };
     
@@ -102,21 +87,14 @@ export class DashboardService {
   async getOrganizerBookings(organizerId: string, query: any) {
     const { page = 1, limit = 10 } = query;
     
-    // Use the same organizerId format as determined in getOrganizerStats
-    const totalEventsString = await this.eventModel.countDocuments({ organizerId: organizerId });
-    const organizerQuery = totalEventsString > 0 ? organizerId : new Types.ObjectId(organizerId);
+    // Convert to ObjectId for consistent querying
+    const organizerQuery = new Types.ObjectId(organizerId);
     
     const eventIds = await this.eventModel.find({ organizerId: organizerQuery }).select('_id');
     const eventIdArray = eventIds.map(event => event._id);
-    const eventIdStringArray = eventIds.map(event => (event._id as Types.ObjectId).toString());
     
     const bookings = await this.bookingModel
-      .find({ 
-        $or: [
-          { eventId: { $in: eventIdArray } },
-          { eventId: { $in: eventIdStringArray } }
-        ]
-      })
+      .find({ eventId: { $in: eventIdArray } })
       .populate('eventId', 'title startAt venue')
       .populate('userId', 'fullName email')
       .sort({ createdAt: -1 })
@@ -124,10 +102,7 @@ export class DashboardService {
       .skip((page - 1) * limit);
 
     const total = await this.bookingModel.countDocuments({ 
-      $or: [
-        { eventId: { $in: eventIdArray } },
-        { eventId: { $in: eventIdStringArray } }
-      ]
+      eventId: { $in: eventIdArray }
     });
 
     return {
@@ -141,20 +116,15 @@ export class DashboardService {
   async getOrganizerPayments(organizerId: string, query: any) {
     const { page = 1, limit = 10 } = query;
     
-    // Use the same organizerId format as determined in getOrganizerStats
-    const totalEventsString = await this.eventModel.countDocuments({ organizerId: organizerId });
-    const organizerQuery = totalEventsString > 0 ? organizerId : new Types.ObjectId(organizerId);
+    // Convert to ObjectId for consistent querying
+    const organizerQuery = new Types.ObjectId(organizerId);
     
     const eventIds = await this.eventModel.find({ organizerId: organizerQuery }).select('_id');
     const eventIdArray = eventIds.map(event => event._id);
-    const eventIdStringArray = eventIds.map(event => (event._id as Types.ObjectId).toString());
     
     const payments = await this.bookingModel
       .find({ 
-        $or: [
-          { eventId: { $in: eventIdArray } },
-          { eventId: { $in: eventIdStringArray } }
-        ],
+        eventId: { $in: eventIdArray },
         status: BookingStatus.CONFIRMED
       })
       .populate('eventId', 'title startAt')
@@ -164,10 +134,7 @@ export class DashboardService {
       .skip((page - 1) * limit);
 
     const total = await this.bookingModel.countDocuments({ 
-      $or: [
-        { eventId: { $in: eventIdArray } },
-        { eventId: { $in: eventIdStringArray } }
-      ],
+      eventId: { $in: eventIdArray },
       status: BookingStatus.CONFIRMED
     });
 
@@ -184,21 +151,16 @@ export class DashboardService {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Use the same organizerId format as determined in getOrganizerStats
-    const totalEventsString = await this.eventModel.countDocuments({ organizerId: organizerId });
-    const organizerQuery = totalEventsString > 0 ? organizerId : new Types.ObjectId(organizerId);
+    // Convert to ObjectId for consistent querying
+    const organizerQuery = new Types.ObjectId(organizerId);
 
     const eventIds = await this.eventModel.find({ organizerId: organizerQuery }).select('_id');
     const eventIdArray = eventIds.map(event => event._id);
-    const eventIdStringArray = eventIds.map(event => (event._id as Types.ObjectId).toString());
     
     const bookingsOverTime = await this.bookingModel.aggregate([
       {
         $match: {
-          $or: [
-            { eventId: { $in: eventIdArray } },
-            { eventId: { $in: eventIdStringArray } }
-          ],
+          eventId: { $in: eventIdArray },
           createdAt: { $gte: startDate }
         }
       },
@@ -217,10 +179,7 @@ export class DashboardService {
     const revenueByEvent = await this.bookingModel.aggregate([
       {
         $match: {
-          $or: [
-            { eventId: { $in: eventIdArray } },
-            { eventId: { $in: eventIdStringArray } }
-          ],
+          eventId: { $in: eventIdArray },
           status: BookingStatus.CONFIRMED,
           createdAt: { $gte: startDate }
         }
