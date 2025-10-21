@@ -20,7 +20,7 @@ import BookingModal from "@/components/ui/BookingModal";
 export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const [event, setEvent] = useState(null);
+  const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -34,7 +34,7 @@ export default function EventDetailsPage() {
 
   const fetchEvent = async () => {
     try {
-      const response = await eventsAPI.getEvent(params.id);
+      const response = await eventsAPI.getEvent(params.id as string);
       setEvent(response.data);
     } catch (error) {
       toast.error("Failed to fetch event details");
@@ -46,8 +46,8 @@ export default function EventDetailsPage() {
   const checkFavorite = async () => {
     try {
       const response = await dashboardAPI.getUserFavorites();
-      const favoriteIds = response.data.favorites.map(fav => fav._id);
-      setIsFavorite(favoriteIds.includes(params.id));
+      const favoriteIds = response.data.favorites.map((fav: any) => fav._id);
+      setIsFavorite(favoriteIds.includes(params.id as string));
     } catch (error) {
       console.error("Failed to check favorite status");
     }
@@ -56,10 +56,10 @@ export default function EventDetailsPage() {
   const toggleFavorite = async () => {
     try {
       if (isFavorite) {
-        await dashboardAPI.removeFromFavorites(params.id);
+        await dashboardAPI.removeFromFavorites(params.id as string);
         toast.success("Removed from favorites");
       } else {
-        await dashboardAPI.addToFavorites(params.id);
+        await dashboardAPI.addToFavorites(params.id as string);
         toast.success("Added to favorites");
       }
       setIsFavorite(!isFavorite);
@@ -221,7 +221,7 @@ export default function EventDetailsPage() {
             <div className="card p-8">
               <h2 className="text-2xl font-bold text-primary mb-4">Tags</h2>
               <div className="flex flex-wrap gap-2">
-                {event.tags.map((tag, index) => (
+                {event.tags.map((tag: any, index: number) => (
                   <span
                     key={index}
                     className="px-3 py-1 text-sm bg-accent/20 text-primary rounded-full"

@@ -39,7 +39,7 @@ export default function BrowseEventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPriceRange, setSelectedPriceRange] = useState("All");
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [favorites, setFavorites] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -62,14 +62,14 @@ export default function BrowseEventsPage() {
   const fetchFavorites = async () => {
     try {
       const response = await dashboardAPI.getUserFavorites();
-      const favoriteIds = new Set(response.data.favorites.map(fav => fav._id));
+      const favoriteIds = new Set(response.data.favorites.map((fav: any) => fav._id));
       setFavorites(favoriteIds);
     } catch (error) {
       console.error('Failed to fetch favorites');
     }
   };
 
-  const filteredEvents = events.filter((event) => {
+  const filteredEvents = events.filter((event: any) => {
     const matchesSearch =
       event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.venue?.toLowerCase().includes(searchTerm.toLowerCase());

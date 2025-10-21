@@ -8,7 +8,7 @@ import { toast } from "react-hot-toast";
 import BookingModal from "@/components/ui/BookingModal";
 
 export default function FavoritesPage() {
-  const [favoriteEvents, setFavoriteEvents] = useState([]);
+  const [favoriteEvents, setFavoriteEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -40,12 +40,12 @@ export default function FavoritesPage() {
     }
   };
 
-  const removeFromFavorites = async (eventId) => {
+  const removeFromFavorites = async (eventId: string) => {
     try {
       console.log('Removing from favorites:', eventId);
       await dashboardAPI.removeFromFavorites(eventId);
       // Remove from local state immediately
-      setFavoriteEvents(prev => prev.filter(event => event._id !== eventId));
+      setFavoriteEvents(prev => prev.filter((event: any) => event._id !== eventId));
       toast.success('Removed from favorites');
       // Refresh from server to ensure consistency
       setTimeout(() => {
