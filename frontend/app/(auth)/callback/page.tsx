@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import toast from 'react-hot-toast'
 import { Loader, Calendar } from 'lucide-react'
 
-export default function AuthCallbackPage() {
+function CallbackHandler() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { setAuth } = useAuth()
@@ -44,6 +44,10 @@ export default function AuthCallbackPage() {
     }
   }, [searchParams, router, setAuth])
 
+  return null
+}
+
+function LoadingUI() {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: 'var(--bg)'}}>
       <div className="text-center">
@@ -58,5 +62,16 @@ export default function AuthCallbackPage() {
         <p className="text-primary">Completing Google sign in...</p>
       </div>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <>
+      <LoadingUI />
+      <Suspense fallback={null}>
+        <CallbackHandler />
+      </Suspense>
+    </>
   )
 }
