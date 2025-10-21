@@ -81,7 +81,7 @@ export class EmailService {
     const apiInstance = new brevo.TransactionalEmailsApi();
     apiInstance.setApiKey(
       brevo.TransactionalEmailsApiApiKeys.apiKey,
-      this.configService.get('BREVO_API_KEY')
+      this.configService.get('BREVO_API_KEY') || ''
     );
 
     const sendSmtpEmail = new brevo.SendSmtpEmail();
