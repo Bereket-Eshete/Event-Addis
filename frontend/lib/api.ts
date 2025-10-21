@@ -88,8 +88,11 @@ export const eventsAPI = {
   updateEvent: (id: string, data: any) => api.patch(`/api/events/${id}`, data),
   deleteEvent: (id: string) => api.delete(`/api/events/${id}`),
   getEvent: (id: string) => api.get(`/api/events/${id}`),
+  getEventById: (id: string) => api.get(`/api/events/${id}`),
   getAllEvents: (params?: { page?: number; limit?: number; category?: string; search?: string }) => 
     api.get('/api/events', { params }),
+  getPublicEvents: (queryString?: string) => 
+    api.get(`/api/events/public${queryString || ''}`),
   bookEvent: (eventId: string, data: any) => api.post(`/api/events/${eventId}/book`, data),
 }
 

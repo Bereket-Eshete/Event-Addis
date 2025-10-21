@@ -5,7 +5,7 @@ const stats = [
   {
     id: 1,
     icon: Users,
-    number: '10,000+',
+    number: '2,500+',
     label: 'Active Users',
     description: 'Event enthusiasts trust EventAddis',
     gradient: 'from-purple-500 to-purple-600',
@@ -13,7 +13,7 @@ const stats = [
   {
     id: 2,
     icon: Calendar,
-    number: '500+',
+    number: '150+',
     label: 'Events Hosted',
     description: 'Successful events organized monthly',
     gradient: 'from-amber-500 to-amber-600',
@@ -21,7 +21,7 @@ const stats = [
   {
     id: 3,
     icon: MapPin,
-    number: '50+',
+    number: '25+',
     label: 'Venues',
     description: 'Premium locations across Addis Ababa',
     gradient: 'from-emerald-500 to-emerald-600',
@@ -29,7 +29,7 @@ const stats = [
   {
     id: 4,
     icon: Star,
-    number: '4.9',
+    number: '4.8',
     label: 'User Rating',
     description: 'Consistently excellent user experience',
     gradient: 'from-pink-500 to-pink-600',
@@ -38,7 +38,7 @@ const stats = [
 
 export function StatsSection() {
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-16 relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -51,11 +51,11 @@ export function StatsSection() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
             EventAddis by the Numbers
           </h2>
-          <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+          <p className="text-base md:text-lg text-purple-100 max-w-2xl mx-auto">
             Join a thriving community of event lovers and organizers making Addis Ababa's social scene more vibrant than ever.
           </p>
         </div>
@@ -68,24 +68,24 @@ export function StatsSection() {
                 key={stat.id}
                 className="text-center group"
               >
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
                   {/* Icon */}
-                  <div className={`w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className="w-8 h-8 text-white" />
+                  <div className={`w-12 h-12 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className="w-6 h-6 text-white" />
                   </div>
 
                   {/* Number */}
-                  <div className="text-4xl lg:text-5xl font-bold text-white mb-2">
+                  <div className="text-2xl md:text-3xl font-bold text-white mb-2">
                     {stat.number}
                   </div>
 
                   {/* Label */}
-                  <div className="text-lg font-semibold text-purple-100 mb-2">
+                  <div className="text-base font-semibold text-purple-100 mb-1">
                     {stat.label}
                   </div>
 
                   {/* Description */}
-                  <div className="text-sm text-purple-200">
+                  <div className="text-xs text-purple-200">
                     {stat.description}
                   </div>
                 </div>
@@ -95,15 +95,15 @@ export function StatsSection() {
         </div>
 
         {/* Additional Info */}
-        <div className="mt-16 text-center">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 max-w-4xl mx-auto">
-            <p className="text-lg text-purple-100 leading-relaxed">
+        <div className="mt-12 text-center">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 max-w-3xl mx-auto">
+            <p className="text-sm md:text-base text-purple-100 leading-relaxed">
               "EventAddis has become the go-to platform for discovering and organizing events in Addis Ababa. 
               Our community continues to grow as more people discover the power of connecting through shared experiences."
             </p>
-            <div className="mt-6">
-              <div className="text-white font-semibold">EventAddis Team</div>
-              <div className="text-purple-200 text-sm">Building connections, one event at a time</div>
+            <div className="mt-4">
+              <div className="text-white font-semibold text-sm">EventAddis Team</div>
+              <div className="text-purple-200 text-xs">Building connections, one event at a time</div>
             </div>
           </div>
         </div>

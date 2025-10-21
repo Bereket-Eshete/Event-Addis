@@ -111,27 +111,7 @@ export function TestimonialsSection() {
           ))}
         </div>
 
-        {/* Trust Indicators */}
-        <div className="mt-16 text-center">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-purple-600">10K+</div>
-              <div className="text-sm text-muted">Happy Users</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-emerald-600">500+</div>
-              <div className="text-sm text-muted">Events Hosted</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-amber-600">200+</div>
-              <div className="text-sm text-muted">Organizers</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-pink-600">4.9★</div>
-              <div className="text-sm text-muted">User Rating</div>
-            </div>
-          </div>
-        </div>
+
       </div>
     </section>
   );
