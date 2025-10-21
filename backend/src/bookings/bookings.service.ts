@@ -160,7 +160,7 @@ export class BookingsService {
       currency: 'ETB',
       amount: booking.paymentInfo.amount.toString(),
       tx_ref: txRef,
-      return_url: `${process.env.FRONTEND_URL}/booking-result?trx_ref=${txRef}&status=success`,
+      return_url: `${process.env.FRONTEND_URL || 'https://event-addis.vercel.app'}/booking-result?trx_ref=${txRef}&status=success`,
       customization: {
         title: 'EventAddis',
         description: `Payment for ${event.title}`,
