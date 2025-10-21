@@ -1,7 +1,8 @@
 'use client'
 
-import { Bell, User, LogOut } from 'lucide-react'
+import { User, LogOut } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { NotificationBell } from '@/components/ui/NotificationBell'
 import { useAuth } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -23,10 +24,7 @@ export default function UserHeader() {
       </div>
       
       <div className="flex items-center space-x-4">
-        <button type="button" className="p-2 rounded-lg hover:bg-surface transition-colors relative">
-          <Bell className="h-5 w-5 text-primary" />
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-        </button>
+        <NotificationBell />
         <ThemeToggle />
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">

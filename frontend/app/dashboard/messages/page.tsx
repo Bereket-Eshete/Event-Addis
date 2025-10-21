@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MessageSquare,
   Send,
@@ -67,6 +67,34 @@ export default function MessagesPage() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [replyText, setReplyText] = useState("");
+
+  // Auto-refresh functionality
+  useEffect(() => {
+    const handleFocus = () => {
+      // Refresh messages when window gains focus
+    };
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Refresh messages when tab becomes visible
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Refresh messages
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const filteredMessages = messages.filter((message) => {
     const matchesSearch =

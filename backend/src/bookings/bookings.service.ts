@@ -16,6 +16,7 @@ import { Event } from '../schemas/event.schema';
 import { User } from '../schemas/user.schema';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { EmailService } from '../auth/email.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class BookingsService {
@@ -25,6 +26,7 @@ export class BookingsService {
     @InjectModel(User.name) private userModel: Model<User>,
     private chapaService: ChapaService,
     private emailService: EmailService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async createBooking(
@@ -106,6 +108,14 @@ export class BookingsService {
 
       // Send confirmation email
       await this.sendBookingConfirmationEmail(user, event, booking);
+
+      // Send system notification
+      await this.notificationsService.sendSystemNotification(
+        userId,
+        'Booking Confirmed',
+        `Your booking for "${event.title}" has been confirmed.`,
+        `/user/tickets`
+      );
 
       return { booking, message: 'Booking confirmed successfully' };
     } else {
@@ -201,6 +211,14 @@ export class BookingsService {
             booking,
           );
 
+          // Send system notification
+          await this.notificationsService.sendSystemNotification(
+            (booking.userId as any)._id.toString(),
+            'Payment Confirmed',
+            `Your payment for "${(booking.eventId as any).title}" has been confirmed.`,
+            `/user/tickets`
+          );
+
           return { message: 'Payment confirmed successfully' };
         }
       } catch (error) {
@@ -217,6 +235,14 @@ export class BookingsService {
       await this.sendPaymentFailedEmail(
         booking.userId as any,
         booking.eventId as any,
+      );
+
+      // Send system notification
+      await this.notificationsService.sendSystemNotification(
+        (booking.userId as any)._id.toString(),
+        'Payment Failed',
+        `Payment for "${(booking.eventId as any).title}" could not be processed. Please try again.`,
+        `/user/browse`
       );
     }
 

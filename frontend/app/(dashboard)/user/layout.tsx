@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   Calendar,
-  Heart
+  Heart,
+  Bell
 } from 'lucide-react'
 import UserHeader from '@/components/layout/UserHeader'
 
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Browse Events', href: '/user/browse', icon: Search },
   { name: 'My Tickets', href: '/user/tickets', icon: Ticket },
   { name: 'Favorites', href: '/user/favorites', icon: Heart },
+  { name: 'Notifications', href: '/user/notifications', icon: Bell },
   { name: 'Payments', href: '/user/payments', icon: CreditCard },
   { name: 'Messages', href: '/user/messages', icon: MessageSquare },
   { name: 'Profile', href: '/user/profile', icon: User },
