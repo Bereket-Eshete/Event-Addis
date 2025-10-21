@@ -33,6 +33,34 @@ export default function EventsPage() {
     fetchEvents();
   }, [statusFilter, pagination.page]);
 
+  // Refresh data when window gains focus (when returning from create page)
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchEvents();
+    };
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchEvents();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchEvents();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const fetchEvents = async () => {
     try {
       setLoading(true);

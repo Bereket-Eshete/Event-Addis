@@ -42,6 +42,34 @@ export default function PaymentsPage() {
     fetchPayments();
   }, [pagination.page]);
 
+  // Auto-refresh functionality
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchPayments();
+    };
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchPayments();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchPayments();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const fetchPayments = async () => {
     try {
       setLoading(true);

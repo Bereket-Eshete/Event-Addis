@@ -23,7 +23,7 @@ export default function UserHeader() {
       </div>
       
       <div className="flex items-center space-x-4">
-        <button className="p-2 rounded-lg hover:bg-surface transition-colors relative">
+        <button type="button" className="p-2 rounded-lg hover:bg-surface transition-colors relative">
           <Bell className="h-5 w-5 text-primary" />
           <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
         </button>
@@ -39,6 +39,7 @@ export default function UserHeader() {
           </span>
         </div>
         <button 
+          type="button"
           onClick={handleLogout}
           className="p-2 rounded-lg hover:bg-surface transition-colors"
           title="Logout"

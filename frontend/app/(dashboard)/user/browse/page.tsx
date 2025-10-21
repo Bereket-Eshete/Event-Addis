@@ -207,6 +207,7 @@ export default function BrowseEventsPage() {
 
               {/* Favorite Button */}
               <button
+                type="button"
                 onClick={() => toggleFavorite(event._id)}
                 className="absolute flex items-center justify-center w-8 h-8 transition-colors rounded-full top-4 right-4 bg-white/90 hover:bg-white"
               >
@@ -262,6 +263,7 @@ export default function BrowseEventsPage() {
               <div className="flex items-center justify-between">
                 <div className="text-xs text-muted">by {event.organizerId?.organizationName || event.organizerId?.fullName || 'Unknown Organizer'}</div>
                 <button 
+                  type="button"
                   onClick={() => router.push(`/user/events/${event._id}`)}
                   className="px-4 py-2 text-sm rounded-lg btn-primary"
                 >
@@ -285,6 +287,7 @@ export default function BrowseEventsPage() {
             Try adjusting your search or filters
           </p>
           <button
+            type="button"
             onClick={() => {
               setSearchTerm("");
               setSelectedCategory("All");
