@@ -18,6 +18,7 @@ import {
   Loader,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 import { useAuth } from "@/lib/auth";
 
 const navigation = [
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Events", href: "/dashboard/events", icon: Calendar },
   { name: "Bookings", href: "/dashboard/bookings", icon: Ticket },
   { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
+  { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Profile", href: "/dashboard/profile", icon: Settings },
@@ -163,10 +165,7 @@ export default function DashboardLayout({
           </button>
 
           <div className="flex items-center ml-auto space-x-4">
-            <button className="relative p-2 transition-colors rounded-lg hover:bg-surface" suppressHydrationWarning>
-              <Bell className="w-5 h-5 text-primary" />
-              <span className="absolute w-3 h-3 bg-red-500 rounded-full -top-1 -right-1"></span>
-            </button>
+            <NotificationBell />
             <ThemeToggle />
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary">

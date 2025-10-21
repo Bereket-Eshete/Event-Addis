@@ -2,8 +2,9 @@
 //dynamic event page
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, MapPin, Users, DollarSign, Clock } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, DollarSign, Clock, Megaphone } from 'lucide-react';
 import { eventsAPI } from '@/lib/api';
+import { AnnouncementModal } from '@/components/ui/AnnouncementModal';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
@@ -12,6 +13,7 @@ export default function EventDetailPage() {
   const router = useRouter();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -64,6 +66,13 @@ export default function EventDetailPage() {
           <p className="mt-1 text-muted">Event Details</p>
         </div>
         <div className="flex space-x-2">
+          <button
+            onClick={() => setShowAnnouncementModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Megaphone className="w-4 h-4" />
+            <span>Send Announcement</span>
+          </button>
           <Link
             href={`/dashboard/events/${event._id}/edit`}
             className="px-4 py-2 border rounded-lg border-muted text-primary hover:bg-surface transition-colors"
@@ -147,6 +156,13 @@ export default function EventDetailPage() {
           </div>
         </div>
       </div>
+
+      <AnnouncementModal
+        isOpen={showAnnouncementModal}
+        onClose={() => setShowAnnouncementModal(false)}
+        eventId={event._id}
+        eventTitle={event.title}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Menu, X, Calendar, ChevronDown, User, LogOut } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 import { useAuth } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
@@ -81,6 +82,7 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
             <ThemeToggle />
+            {isAuthenticated && <NotificationBell />}
             
             {isLoading ? (
               <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>

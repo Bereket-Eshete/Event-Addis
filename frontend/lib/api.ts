@@ -98,4 +98,15 @@ export const profileAPI = {
   updateProfile: (data: any) => api.put('/auth/profile', data),
 }
 
+export const notificationsAPI = {
+  getNotifications: (params?: { page?: number; limit?: number }) => 
+    api.get('/notifications', { params }),
+  markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
+  markAllAsRead: () => api.put('/notifications/mark-all-read'),
+  sendAnnouncement: (data: { eventId: string; title: string; message: string }) => 
+    api.post('/notifications/announcement', data),
+  sendMessage: (data: { recipientId: string; eventId: string; message: string }) => 
+    api.post('/notifications/message', data),
+}
+
 export default api

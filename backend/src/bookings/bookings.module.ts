@@ -7,7 +7,9 @@ import { BookingsController } from './bookings.controller';
 import { Booking, BookingSchema } from '../schemas/booking.schema';
 import { Event, EventSchema } from '../schemas/event.schema';
 import { User, UserSchema } from '../schemas/user.schema';
+import { Notification, NotificationSchema } from '../schemas/notification.schema';
 import { EmailService } from '../auth/email.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { EmailService } from '../auth/email.service';
       { name: Booking.name, schema: BookingSchema },
       { name: Event.name, schema: EventSchema },
       { name: User.name, schema: UserSchema },
+      { name: Notification.name, schema: NotificationSchema },
     ]),
     ChapaModule.registerAsync({
       imports: [ConfigModule],
@@ -25,7 +28,7 @@ import { EmailService } from '../auth/email.service';
     }),
   ],
   controllers: [BookingsController],
-  providers: [BookingsService, EmailService],
+  providers: [BookingsService, EmailService, NotificationsService],
   exports: [BookingsService],
 })
 export class BookingsModule {}
