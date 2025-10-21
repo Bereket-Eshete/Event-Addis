@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   //add the deve url to allow request from the localhost
   app.enableCors({
-    origin: [process.env.FRONTEND_URL, 'http://localhost:3000'].filter(Boolean),
+    origin: [process.env.FRONTEND_URL, 'http://localhost:3000', 'https://event-addis.vercel.app'].filter(Boolean),
     credentials: true,
   });
 

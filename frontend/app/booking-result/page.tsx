@@ -31,7 +31,7 @@ function PaymentHandler({ onStatusChange }: { onStatusChange: (status: string) =
   const verifyPayment = async (txRef: string) => {
     try {
       console.log('Verifying payment for txRef:', txRef);
-      const response = await fetch(`http://localhost:3001/api/verify-payment/${txRef}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/verify-payment/${txRef}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
