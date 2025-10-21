@@ -1,7 +1,7 @@
 'use client'
 
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
-
+import Link from 'next/link';
 import Image from 'next/image';
 
 const events = [
@@ -156,12 +156,12 @@ export function PopularEventsSection() {
         </div>
 
         <div className="text-center">
-          <a 
+          <Link 
             href="/discover"
             className="inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-4 text-lg rounded-lg font-medium transition-all cursor-pointer hover:scale-105 hover:shadow-lg"
           >
             View All Events
-          </a>
+          </Link>
         </div>
       </div>
     </section>

@@ -1,4 +1,5 @@
 import { Calendar, Target, Eye, Heart, Users, Zap, Globe } from 'lucide-react'
+import Link from 'next/link'
 
 export default function AboutPage() {
   return (
@@ -163,18 +164,18 @@ export default function AboutPage() {
               seeking amazing experiences, EventAddis is here for you.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
+              <Link 
                 href="/signup" 
                 className="px-6 py-3 text-white rounded-lg gradient-primary hover:opacity-90 transition-opacity"
               >
                 Get Started Today
-              </a>
-              <a 
+              </Link>
+              <Link 
                 href="/discover" 
                 className="px-6 py-3 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors"
               >
                 Explore Events
-              </a>
+              </Link>
             </div>
           </div>
         </section>
