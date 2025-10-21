@@ -1,5 +1,7 @@
-import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+'use client'
 
+import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+import Link from 'next/link';
 import Image from 'next/image';
 
 const events = [
@@ -74,7 +76,16 @@ export function PopularEventsSection() {
           {events.map((event) => (
             <div
               key={event.id}
-              className="group card rounded-2xl hover:shadow-2xl transition-all duration-300 overflow-hidden hover:border-primary/30"
+              className="group card rounded-2xl hover:shadow-2xl transition-all duration-300 overflow-hidden hover:border-primary/30 hover:shadow-primary/20 hover:shadow-2xl"
+              style={{
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 30px rgba(139, 92, 246, 0.3), 0 0 60px rgba(236, 72, 153, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '';
+              }}
             >
               {/* Event Image */}
               <div className="relative h-48 overflow-hidden">
@@ -132,7 +143,10 @@ export function PopularEventsSection() {
                     by {event.organizer}
                   </p>
                   
-                  <button className="w-full btn-cta group-hover:scale-105 transition-transform shadow-md rounded-lg py-2 px-4 font-medium text-sm">
+                  <button 
+                    type="button"
+                    className="w-full bg-amber-500 dark:bg-amber-500 text-white hover:bg-amber-600 dark:hover:bg-amber-600 group-hover:scale-105 transition-all shadow-md rounded-lg py-2 px-4 font-medium text-sm"
+                  >
                     Register Now
                   </button>
                 </div>
@@ -142,9 +156,12 @@ export function PopularEventsSection() {
         </div>
 
         <div className="text-center">
-          <button className="border-2 border-primary text-primary hover:bg-primary hover:text-surface px-8 py-4 text-lg rounded-lg font-medium transition-all">
+          <Link 
+            href="/discover"
+            className="inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-4 text-lg rounded-lg font-medium transition-all cursor-pointer hover:scale-105 hover:shadow-lg"
+          >
             View All Events
-          </button>
+          </Link>
         </div>
       </div>
     </section>

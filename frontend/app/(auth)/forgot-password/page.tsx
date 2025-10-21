@@ -34,35 +34,35 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{backgroundColor: 'var(--bg)'}}>
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-500">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary">
                 <Calendar className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-primary">
                 EventAddis
               </span>
             </Link>
             
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
             </div>
             
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-3xl font-bold text-primary mb-4">
               Check your email
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-muted mb-6">
               We&apos;ve sent a password reset link to <strong>{email}</strong>
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <p className="text-sm text-muted mb-8">
               Didn&apos;t receive the email? Check your spam folder or{' '}
               <button
                 onClick={() => setIsSubmitted(false)}
-                className="text-purple-600 hover:text-purple-500 font-medium"
+                className="text-primary hover:text-accent font-medium"
               >
                 try again
               </button>
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
             
             <Link
               href="/login"
-              className="inline-flex items-center text-purple-600 hover:text-purple-500 font-medium"
+              className="inline-flex items-center text-primary hover:text-accent font-medium"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to sign in
@@ -82,22 +82,22 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{backgroundColor: 'var(--bg)'}}>
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary">
               <Calendar className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold text-primary">
               EventAddis
             </span>
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold text-primary">
             Forgot your password?
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-muted">
             No worries! Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
         </div>
@@ -105,19 +105,19 @@ export default function ForgotPasswordPage() {
         {/* Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} suppressHydrationWarning>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-primary mb-2">
               Email address
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-gray-400" />
+                <Mail className="h-5 w-5 text-muted" />
               </div>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="block w-full pl-10 pr-3 py-3 border border-muted rounded-lg bg-surface text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -134,7 +134,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative w-full flex justify-center py-3 px-4 btn-primary text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="flex items-center">
@@ -151,7 +151,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center">
           <Link
             href="/login"
-            className="inline-flex items-center text-sm text-purple-600 hover:text-purple-500 font-medium"
+            className="inline-flex items-center text-sm text-primary hover:text-accent font-medium"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to sign in

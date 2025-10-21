@@ -10,11 +10,10 @@ import { useAuth } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
 const navigation = [
-  { name: 'Discover', href: '/events' },
-  { name: 'Organizers', href: '/organizers' },
-  { name: 'About', href: '/about' },
-  { name: 'Pricing', href: '/pricing' },
-  { name: 'Blog', href: '/blog' },
+  { name: 'Discover', href: '/discover' },
+  { name: 'About Us', href: '/about' },
+  { name: 'Contact', href: '/contact' },
+  { name: 'FAQ', href: '/faq' },
 ];
 
 export function Header() {
@@ -72,7 +71,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-sm font-medium text-primary hover:text-primary transition-colors"
+                className="text-sm font-medium text-primary hover:text-accent transition-colors"
               >
                 {item.name}
               </Link>

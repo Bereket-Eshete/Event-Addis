@@ -7,8 +7,9 @@ import { Footer } from "@/components/layout/Footer"
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isDashboard = pathname?.startsWith('/dashboard') || pathname?.startsWith('/user')
+  const isAuth = pathname?.startsWith('/login') || pathname?.startsWith('/signup') || pathname?.startsWith('/forgot-password') || pathname?.startsWith('/reset-password') || pathname?.startsWith('/verify-email') || pathname?.startsWith('/signup-success') || pathname?.startsWith('/callback')
 
-  if (isDashboard) {
+  if (isDashboard || isAuth) {
     return <>{children}</>
   }
 
