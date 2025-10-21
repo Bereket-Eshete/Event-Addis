@@ -8,7 +8,9 @@ export class EmailService {
 
   constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp-relay.brevo.com',
+      port: 587,
+      secure: false,
       auth: {
         user: this.configService.get('EMAIL_USER'),
         pass: this.configService.get('EMAIL_PASS'),
