@@ -1,41 +1,43 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
+  private transporter: nodemailer.Transporter;
+
   constructor(private configService: ConfigService) {
-    console.log('📧 Initializing email service with Web3Forms');
+    // Create Gmail transporter as fallback
+    this.transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'bereketeshete63@gmail.com',
+        pass: 'wvsisnpxmkrvqgan', // Your app password
+      },
+    });
+    console.log('📧 Initializing email service with Gmail SMTP');
   }
 
-  private async sendWeb3FormsEmail(
+  private async sendGmailEmail(
     to: string,
     subject: string,
     html: string
   ) {
     try {
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          access_key: 'c8f2e4d6-1a3b-4c5e-9f8a-2b4c6d8e0f1a',
-          email: to,
-          subject: subject,
-          message: html,
-          from_name: 'EventAddis Team',
-          replyto: 'noreply@eventaddis.com',
-        }),
-      });
+      console.log('📧 Attempting to send email via Gmail to:', to);
       
-      const result = await response.json();
-      if (result.success) {
-        console.log('✅ Email sent successfully to:', to);
-        return { success: true };
-      }
-      throw new Error(result.message || 'Email send failed');
+      const mailOptions = {
+        from: '"EventAddis Team" <bereketeshete63@gmail.com>',
+        to: to,
+        subject: subject,
+        html: html,
+      };
+      
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Email sent successfully via Gmail:', result.messageId);
+      return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.error('❌ Email send failed:', error.message);
+      console.error('❌ Gmail email failed:', error.message);
       throw error;
     }
   }
@@ -57,14 +59,16 @@ export class EmailService {
     `;
 
     try {
-      await this.sendWeb3FormsEmail(
+      console.log('📧 Sending verification email to:', email);
+      const result = await this.sendGmailEmail(
         email,
         'Email Verification - EventAddis',
         htmlContent
       );
+      console.log('✅ Verification email sent successfully');
       return { success: true };
     } catch (error) {
-      console.error('Email send error:', error.message);
+      console.error('❌ Verification email failed:', error.message);
       return { success: false, error: 'Email service temporarily unavailable' };
     }
   }
@@ -86,21 +90,23 @@ export class EmailService {
     `;
 
     try {
-      await this.sendWeb3FormsEmail(
+      console.log('📧 Sending password reset email to:', email);
+      const result = await this.sendGmailEmail(
         email,
         'Password Reset - EventAddis',
         htmlContent
       );
+      console.log('✅ Password reset email sent successfully');
       return { success: true };
     } catch (error) {
-      console.error('Email send error:', error.message);
+      console.error('❌ Password reset email failed:', error.message);
       return { success: false, error: 'Email service temporarily unavailable' };
     }
   }
 
   async sendEmail(to: string, subject: string, html: string) {
     try {
-      await this.sendWeb3FormsEmail(to, subject, html);
+      await this.sendGmailEmail(to, subject, html);
       return { success: true };
     } catch (error) {
       console.error('Email send error:', error.message);

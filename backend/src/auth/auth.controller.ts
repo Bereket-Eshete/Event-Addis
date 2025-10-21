@@ -91,4 +91,14 @@ export class AuthController {
   async organizerAdmin() {
     return { message: 'This endpoint is for organizers and admins' };
   }
+
+  @Post('test-email')
+  async testEmail(@Body() { email }: { email: string }) {
+    try {
+      const result = await this.authService.testEmail(email);
+      return result;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
 }
