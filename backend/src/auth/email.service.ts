@@ -88,7 +88,7 @@ export class EmailService {
     sendSmtpEmail.to = [{ email: to }];
     sendSmtpEmail.sender = {
       name: fromName,
-      email: this.configService.get('EMAIL_USER') || '',
+      email: this.configService.get('EMAIL_USER') || '89338a001@smtp-brevo.com',
     };
     sendSmtpEmail.subject = subject;
     sendSmtpEmail.htmlContent = htmlContent;
