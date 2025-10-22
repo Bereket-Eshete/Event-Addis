@@ -27,6 +27,7 @@ const navigation = [
   { name: "Bookings", href: "/dashboard/bookings", icon: Ticket },
   { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+  { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { name: "Profile", href: "/dashboard/profile", icon: Settings },
 ];
 
