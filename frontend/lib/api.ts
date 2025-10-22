@@ -104,13 +104,6 @@ export const profileAPI = {
 export const notificationsAPI = {
   getNotifications: (params?: { page?: number; limit?: number }) => 
     api.get('/notifications', { params }),
-  markAsRead: (id: string) => api.post(`/notifications/${id}/read`),
-  markAllAsRead: () => api.post('/notifications/read-all'),
-}
-
-export const notificationsAPI = {
-  getNotifications: (params?: { page?: number; limit?: number }) => 
-    api.get('/notifications', { params }),
   markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
   markAllAsRead: () => api.put('/notifications/mark-all-read'),
   sendAnnouncement: (data: { eventId: string; title: string; message: string }) => 
