@@ -89,7 +89,7 @@ export const eventsAPI = {
   deleteEvent: (id: string) => api.delete(`/api/events/${id}`),
   getEvent: (id: string) => api.get(`/api/events/${id}`),
   getEventById: (id: string) => api.get(`/api/events/${id}`),
-  getAllEvents: (params?: { page?: number; limit?: number; category?: string; search?: string }) => 
+  getAllEvents: (params?: any) => 
     api.get('/api/events', { params }),
   getPublicEvents: (queryString?: string) => 
     api.get(`/api/events/public${queryString || ''}`),

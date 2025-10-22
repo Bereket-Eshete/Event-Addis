@@ -17,8 +17,8 @@ export default function DiscoverPage() {
   const { user } = useAuth()
   const router = useRouter()
 
-  const categories = ['Technology', 'Business', 'Arts', 'Sports', 'Education', 'Entertainment', 'Health', 'Food']
-  const types = ['Conference', 'Workshop', 'Seminar', 'Networking', 'Exhibition', 'Concert', 'Festival']
+  const categories = ['technology', 'business', 'sports', 'education', 'entertainment', 'conference', 'workshop', 'seminar', 'networking', 'cultural', 'other']
+  const types = ['online', 'in-person', 'hybrid']
 
   useEffect(() => {
     fetchEvents()
@@ -30,7 +30,7 @@ export default function DiscoverPage() {
       const params: any = {}
       
       if (searchTerm) {
-        params.search = searchTerm
+        params.q = searchTerm
       }
       if (selectedCategory) {
         params.category = selectedCategory
@@ -39,7 +39,7 @@ export default function DiscoverPage() {
         params.type = selectedType
       }
       if (priceFilter === 'free') {
-        params.price = 0
+        params.maxPrice = 0
       } else if (priceFilter === 'paid') {
         params.minPrice = 1
       }
@@ -107,7 +107,7 @@ export default function DiscoverPage() {
               >
                 <option value="">All Categories</option>
                 {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                  <option key={category} value={category}>{category.charAt(0).toUpperCase() + category.slice(1)}</option>
                 ))}
               </select>
 
@@ -119,7 +119,7 @@ export default function DiscoverPage() {
               >
                 <option value="">All Types</option>
                 {types.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')}</option>
                 ))}
               </select>
 
