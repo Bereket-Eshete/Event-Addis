@@ -12,16 +12,56 @@ export default function ContactPage() {
     message: ''
   })
   const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState<{[key: string]: string}>({})
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {}
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required'
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters'
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
+    }
+    
+    if (!formData.subject) {
+      newErrors.subject = 'Please select a subject'
+    }
+    
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required'
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!validateForm()) {
+      toast.error('Please fix the errors below')
+      return
+    }
+    
     setLoading(true)
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Message sent successfully! We\'ll get back to you soon.')
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Thank you for your message! We\'ve received your inquiry and will get back to you within 24 hours.', {
+        duration: 5000,
+        icon: '✉️'
+      })
       setFormData({ name: '', email: '', subject: '', message: '' })
+      setErrors({})
     } catch (error) {
       toast.error('Failed to send message. Please try again.')
     } finally {
@@ -30,10 +70,19 @@ export default function ContactPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     })
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      })
+    }
   }
 
   return (
@@ -136,9 +185,12 @@ export default function ContactPage() {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className={`w-full px-4 py-3 border rounded-lg bg-background text-primary focus:outline-none focus:ring-2 ${
+                        errors.name ? 'border-red-500 focus:ring-red-500/20' : 'border-muted focus:ring-primary/20'
+                      }`}
                       placeholder="Your full name"
                     />
+                    {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                   </div>
 
                   <div>
@@ -152,9 +204,12 @@ export default function ContactPage() {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className={`w-full px-4 py-3 border rounded-lg bg-background text-primary focus:outline-none focus:ring-2 ${
+                        errors.email ? 'border-red-500 focus:ring-red-500/20' : 'border-muted focus:ring-primary/20'
+                      }`}
                       placeholder="your.email@example.com"
                     />
+                    {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                   </div>
                 </div>
 
@@ -168,7 +223,9 @@ export default function ContactPage() {
                     required
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className={`w-full px-4 py-3 border rounded-lg bg-background text-primary focus:outline-none focus:ring-2 ${
+                      errors.subject ? 'border-red-500 focus:ring-red-500/20' : 'border-muted focus:ring-primary/20'
+                    }`}
                   >
                     <option value="">Select a subject</option>
                     <option value="general">General Inquiry</option>
@@ -179,6 +236,7 @@ export default function ContactPage() {
                     <option value="partnership">Partnership Opportunity</option>
                     <option value="feedback">Feedback & Suggestions</option>
                   </select>
+                  {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject}</p>}
                 </div>
 
                 <div>
@@ -192,9 +250,12 @@ export default function ContactPage() {
                     rows={6}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                    className={`w-full px-4 py-3 border rounded-lg bg-background text-primary focus:outline-none focus:ring-2 resize-none ${
+                      errors.message ? 'border-red-500 focus:ring-red-500/20' : 'border-muted focus:ring-primary/20'
+                    }`}
                     placeholder="Please describe your inquiry in detail..."
                   />
+                  {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
                 </div>
 
                 <button
