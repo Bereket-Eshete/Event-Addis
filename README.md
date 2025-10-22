@@ -10,10 +10,10 @@ EventAddis connects event seekers and organizers in one place, providing a seaml
 - **Event Discovery**: Browse and search events by category, type, location, and price
 - **Smart Filtering**: Advanced search with multiple filters and sorting options
 - **Secure Booking**: Book events with integrated Chapa payment processing
-- **Digital Tickets**: Download and view tickets with QR codes
+- **Digital Tickets**: Download and view tickets
 - **Favorites System**: Save events for later viewing
 - **User Dashboard**: Track bookings, payments, and event history
-- **Real-time Notifications**: Get updates about events and bookings
+- **Notifications**: Get updates about events and bookings
 
 ### For Event Organizers
 - **Event Management**: Create, edit, and manage events with rich details
@@ -25,7 +25,6 @@ EventAddis connects event seekers and organizers in one place, providing a seaml
 
 ### General Features
 - **Authentication**: Email/password and Google OAuth login
-- **Email Verification**: Secure account verification with Brevo
 - **Password Reset**: Secure password recovery system
 - **Responsive Design**: Mobile-first design with dark/light themes
 - **Role-based Access**: Separate interfaces for attendees and organizers
@@ -45,7 +44,7 @@ EventAddis connects event seekers and organizers in one place, providing a seaml
 - **MongoDB** - NoSQL database with Mongoose ODM
 - **JWT** - Authentication and authorization
 - **Passport.js** - Google OAuth integration
-- **Brevo API** - Email service
+
 - **Cloudinary** - Image upload and management
 - **Chapa** - Payment processing for Ethiopia
 
@@ -59,7 +58,7 @@ EventAddis connects event seekers and organizers in one place, providing a seaml
 - Node.js 18+ and npm
 - MongoDB Atlas account
 - Google OAuth credentials
-- Brevo account for emails
+
 - Chapa account for payments
 - Cloudinary account for images
 
@@ -88,8 +87,7 @@ GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
 FRONTEND_URL=http://localhost:3000
-BREVO_API_KEY=your-brevo-api-key
-EMAIL_USER=your-verified-sender-email
+
 CLOUDINARY_CLOUD_NAME=your-cloudinary-name
 CLOUDINARY_API_KEY=your-cloudinary-key
 CLOUDINARY_API_SECRET=your-cloudinary-secret
@@ -171,11 +169,7 @@ Event-Addis/
 
 *Any other phone numbers will return a failed payment status.*
 
-## 📧 Email System
 
-- **Brevo Integration**: Reliable email delivery
-- **Email Templates**: Professional HTML email templates
-- **Notification Types**: Welcome, verification, password reset, booking confirmations
 
 ## 🎨 UI/UX Features
 
@@ -203,6 +197,30 @@ Event-Addis/
 - `GET /dashboard/organizer/stats` - Organizer statistics
 - `GET /dashboard/user/bookings` - User bookings
 - `GET /notifications` - Get notifications
+
+## 🧪 Testing
+
+### Frontend Tests
+```bash
+cd frontend
+npm test              # Run all tests
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Run tests with coverage
+```
+
+### Backend Tests
+```bash
+cd backend
+npm test              # Run unit tests
+npm run test:watch    # Run tests in watch mode
+npm run test:cov      # Run tests with coverage
+npm run test:e2e      # Run integration tests
+```
+
+### Test Coverage
+- **Frontend**: Unit tests for components, API functions, and auth hooks
+- **Backend**: Unit tests for services and integration tests for endpoints
+- **Testing Libraries**: Jest, React Testing Library, NestJS Testing
 
 ## 🚀 Deployment
 
@@ -240,7 +258,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - NestJS team for the robust backend framework
 - Tailwind CSS for the utility-first CSS framework
 - Chapa for Ethiopian payment processing
-- Brevo for reliable email services
+
 
 ## 📞 Support
 
