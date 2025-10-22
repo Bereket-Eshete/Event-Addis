@@ -49,7 +49,7 @@ export const authAPI = {
   forgotPassword: (email: string) =>
     api.post('/auth/forgot-password', { email }),
   
-  resetPassword: (data: { token: string; newPassword: string }) =>
+  resetPassword: (data: { email: string; newPassword: string }) =>
     api.post('/auth/reset-password', data),
   
   googleAuth: (token: string) =>
@@ -99,6 +99,13 @@ export const eventsAPI = {
 export const profileAPI = {
   getProfile: () => api.get('/auth/profile'),
   updateProfile: (data: any) => api.put('/auth/profile', data),
+}
+
+export const notificationsAPI = {
+  getNotifications: (params?: { page?: number; limit?: number }) => 
+    api.get('/notifications', { params }),
+  markAsRead: (id: string) => api.post(`/notifications/${id}/read`),
+  markAllAsRead: () => api.post('/notifications/read-all'),
 }
 
 export const notificationsAPI = {

@@ -32,29 +32,33 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     const user = new this.userModel({
       fullName,
       email,
       password: hashedPassword,
       role,
-      emailVerificationToken,
-      emailVerificationExpires,
+      isEmailVerified: true,
+      status: UserStatus.ACTIVE,
       termsAccepted,
       ...otherFields,
     });
 
     await user.save();
     
-    try {
-      await this.emailService.sendVerificationEmail(email, emailVerificationToken);
-      return { message: 'User registered successfully. Please check your email to verify your account.' };
-    } catch (emailError) {
-      console.error('Failed to send verification email:', emailError);
-      return { message: 'User registered successfully. Email verification temporarily unavailable - you can still log in.' };
-    }
+    const payload = { sub: user._id, email: user.email, role: user.role };
+    const token = this.jwtService.sign(payload);
+
+    return {
+      message: 'User registered successfully',
+      access_token: token,
+      user: {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+      },
+    };
   }
 
   async login(loginDto: LoginDto) {
@@ -68,10 +72,6 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
-    }
-
-    if (!user.isEmailVerified) {
-      throw new UnauthorizedException('Please verify your email before logging in');
     }
 
     if (user.status !== UserStatus.ACTIVE) {
@@ -119,39 +119,23 @@ export class AuthService {
       throw new NotFoundException('User with this email does not exist');
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    user.passwordResetToken = resetToken;
-    user.passwordResetExpires = resetExpires;
-    await user.save();
-
-    try {
-      const emailResult = await this.emailService.sendPasswordResetEmail(email, resetToken);
-      console.log('📧 Password reset email result:', emailResult);
-      return { message: 'Password reset email sent successfully' };
-    } catch (emailError) {
-      console.error('❌ Failed to send password reset email:', emailError);
-      // Still return success to user for security (don't reveal if email exists)
-      return { message: 'Password reset email sent successfully' };
-    }
+    return { 
+      message: 'Email verified. You can now reset your password.',
+      canReset: true,
+      email: email
+    };
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const { token, newPassword } = resetPasswordDto;
-    const user = await this.userModel.findOne({
-      passwordResetToken: token,
-      passwordResetExpires: { $gt: new Date() },
-    });
+    const { email, newPassword } = resetPasswordDto;
+    const user = await this.userModel.findOne({ email });
 
     if (!user) {
-      throw new BadRequestException('Invalid or expired reset token');
+      throw new BadRequestException('User not found');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
     user.password = hashedPassword;
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
     await user.save();
 
     return { message: 'Password reset successfully' };

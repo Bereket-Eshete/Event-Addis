@@ -9,12 +9,11 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    phone: '',
-    location: '',
-    dateOfBirth: ''
+    contactNumber: ''
   });
 
   useEffect(() => {
@@ -29,9 +28,7 @@ export default function ProfilePage() {
       setFormData({
         fullName: userData.fullName || '',
         email: userData.email || '',
-        phone: userData.phone || '',
-        location: userData.location || '',
-        dateOfBirth: userData.dateOfBirth ? userData.dateOfBirth.split('T')[0] : ''
+        contactNumber: userData.contactNumber || ''
       });
     } catch (error) {
       toast.error('Failed to fetch profile');
@@ -43,11 +40,17 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await profileAPI.updateProfile(formData);
+      const updateData = {
+        fullName: formData.fullName,
+        contactNumber: formData.contactNumber
+      };
+      await profileAPI.updateProfile(updateData);
       toast.success('Profile updated successfully');
+      setHasChanges(false);
       fetchProfile();
-    } catch (error) {
-      toast.error('Failed to update profile');
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -55,6 +58,7 @@ export default function ProfilePage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasChanges(true);
   };
 
   if (loading) {
@@ -93,18 +97,19 @@ export default function ProfilePage() {
             Personal Information
           </h3>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-4">
             <div>
               <label className="block mb-2 text-sm font-medium text-primary">
                 Full Name
               </label>
-              <div className="flex items-center p-3 space-x-2 border rounded-lg border-muted">
+              <div className="flex items-center p-3 space-x-2 border rounded-lg border-muted bg-surface">
                 <User className="w-4 h-4 text-muted" />
                 <input
                   type="text"
                   value={formData.fullName}
                   onChange={(e) => handleInputChange('fullName', e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-primary"
+                  className="flex-1 bg-transparent outline-none text-primary placeholder-muted"
+                  placeholder="Enter your full name"
                 />
               </div>
             </div>
@@ -113,80 +118,57 @@ export default function ProfilePage() {
               <label className="block mb-2 text-sm font-medium text-primary">
                 Email
               </label>
-              <div className="flex items-center p-3 space-x-2 border rounded-lg border-muted">
+              <div className="flex items-center p-3 space-x-2 border rounded-lg border-muted bg-muted/20">
                 <Mail className="w-4 h-4 text-muted" />
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-primary"
+                  disabled
+                  className="flex-1 bg-transparent outline-none text-primary cursor-not-allowed"
                 />
               </div>
+              <p className="mt-1 text-xs text-muted">Email cannot be changed</p>
             </div>
 
             <div>
               <label className="block mb-2 text-sm font-medium text-primary">
-                Phone
+                Phone Number
               </label>
-              <div className="flex items-center p-3 space-x-2 border rounded-lg border-muted">
+              <div className="flex items-center p-3 space-x-2 border rounded-lg border-muted bg-surface">
                 <Phone className="w-4 h-4 text-muted" />
                 <input
                   type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-primary"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block mb-2 text-sm font-medium text-primary">
-                Location
-              </label>
-              <div className="flex items-center p-3 space-x-2 border rounded-lg border-muted">
-                <MapPin className="w-4 h-4 text-muted" />
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-primary"
-                />
-              </div>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block mb-2 text-sm font-medium text-primary">
-                Date of Birth
-              </label>
-              <div className="flex items-center p-3 space-x-2 border rounded-lg border-muted">
-                <Calendar className="w-4 h-4 text-muted" />
-                <input
-                  type="date"
-                  value={formData.dateOfBirth}
-                  onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-primary"
+                  value={formData.contactNumber}
+                  onChange={(e) => handleInputChange('contactNumber', e.target.value)}
+                  className="flex-1 bg-transparent outline-none text-primary placeholder-muted"
+                  placeholder="Enter your phone number"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex mt-6 space-x-4">
+          <div className="flex flex-col sm:flex-row mt-6 gap-3 sm:gap-4">
             <button 
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || !hasChanges}
               className="px-6 py-2 text-white transition-opacity rounded-lg gradient-primary hover:opacity-90 disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
+            {hasChanges && (
+              <p className="text-xs text-amber-600 mt-1">You have unsaved changes</p>
+            )}
             <button 
-              onClick={() => setFormData({
-                fullName: profile?.fullName || '',
-                email: profile?.email || '',
-                phone: profile?.phone || '',
-                location: profile?.location || '',
-                dateOfBirth: profile?.dateOfBirth ? profile.dateOfBirth.split('T')[0] : ''
-              })}
-              className="px-6 py-2 transition-colors border rounded-lg border-muted text-primary hover:bg-accent/50"
+              onClick={() => {
+                setFormData({
+                  fullName: profile?.fullName || '',
+                  email: profile?.email || '',
+                  contactNumber: profile?.contactNumber || ''
+                });
+                setHasChanges(false);
+              }}
+              disabled={!hasChanges}
+              className="px-6 py-2 transition-colors border rounded-lg border-muted text-primary hover:bg-accent/50 disabled:opacity-50"
             >
               Cancel
             </button>

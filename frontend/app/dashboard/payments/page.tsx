@@ -272,24 +272,30 @@ export default function PaymentsPage() {
             <Loader className="w-8 h-8 animate-spin text-primary" />
             <span className="ml-2 text-muted">Loading payments...</span>
           </div>
+        ) : filteredTransactions.length === 0 ? (
+          <div className="py-12 text-center">
+            <DollarSign className="w-12 h-12 mx-auto mb-4 text-muted" />
+            <h3 className="mb-2 text-lg font-medium text-primary">No payments found</h3>
+            <p className="text-muted">Payments will appear here once customers book your events</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[640px]">
               <thead className="border-b bg-surface border-muted">
                 <tr>
-                  <th className="px-6 py-4 font-medium text-left text-primary">
+                  <th className="px-4 sm:px-6 py-4 font-medium text-left text-primary">
                     Event
                   </th>
-                  <th className="px-6 py-4 font-medium text-left text-primary">
+                  <th className="px-4 sm:px-6 py-4 font-medium text-left text-primary">
                     User
                   </th>
-                  <th className="px-6 py-4 font-medium text-left text-primary">
+                  <th className="px-4 sm:px-6 py-4 font-medium text-left text-primary">
                     Amount
                   </th>
-                  <th className="px-6 py-4 font-medium text-left text-primary">
+                  <th className="px-4 sm:px-6 py-4 font-medium text-left text-primary">
                     Status
                   </th>
-                  <th className="px-6 py-4 font-medium text-left text-primary">
+                  <th className="px-4 sm:px-6 py-4 font-medium text-left text-primary">
                     Date
                   </th>
                 </tr>
@@ -300,28 +306,28 @@ export default function PaymentsPage() {
                     key={payment._id}
                     className="border-b border-muted hover:bg-surface/50"
                   >
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-primary">
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="font-medium text-primary truncate max-w-[150px]">
                         {payment.eventId?.title || 'Unknown Event'}
                       </div>
-                      <div className="text-sm text-muted">
+                      <div className="text-sm text-muted truncate max-w-[150px]">
                         {payment.eventId?.venue || 'No location'}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-primary">
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="font-medium text-primary truncate max-w-[120px]">
                         {payment.userId?.fullName || 'Unknown User'}
                       </div>
-                      <div className="text-sm text-muted">
+                      <div className="text-sm text-muted truncate max-w-[120px]">
                         {payment.userId?.email || 'No email'}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-4">
                       <div className="font-semibold text-primary">
-                        {payment.totalAmount || 0} ETB
+                        {(payment.totalAmount || 0).toLocaleString()} ETB
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-4">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                           payment.status
@@ -330,8 +336,8 @@ export default function PaymentsPage() {
                         {payment.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-primary">
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="text-primary text-sm">
                         {new Date(payment.createdAt).toLocaleDateString()}
                       </div>
                     </td>

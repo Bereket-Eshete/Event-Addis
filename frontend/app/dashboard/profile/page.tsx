@@ -174,7 +174,7 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
               <div>
                 <label className="block mb-2 text-sm font-medium text-primary">
                   Full Name
@@ -184,7 +184,7 @@ export default function ProfilePage() {
                   <input
                     type="text"
                     className={`w-full py-3 pl-10 pr-4 border rounded-lg border-muted text-primary focus:outline-none focus:ring-2 focus:ring-primary ${
-                      isEditing ? 'bg-surface' : 'bg-gray-50 cursor-not-allowed'
+                      isEditing ? 'bg-surface' : 'bg-muted/20 cursor-not-allowed'
                     }`}
                     value={profileData.fullName}
                     onChange={(e) =>
@@ -206,7 +206,7 @@ export default function ProfilePage() {
                   <Mail className="absolute w-5 h-5 transform -translate-y-1/2 left-3 top-1/2 text-muted" />
                   <input
                     type="email"
-                    className="w-full py-3 pl-10 pr-4 border rounded-lg border-muted bg-gray-50 text-primary cursor-not-allowed"
+                    className="w-full py-3 pl-10 pr-4 border rounded-lg border-muted bg-muted/20 text-primary cursor-not-allowed"
                     value={profileData.email}
                     disabled
                   />
@@ -223,7 +223,7 @@ export default function ProfilePage() {
                   <input
                     type="tel"
                     className={`w-full py-3 pl-10 pr-4 border rounded-lg border-muted text-primary focus:outline-none focus:ring-2 focus:ring-primary ${
-                      isEditing ? 'bg-surface' : 'bg-gray-50 cursor-not-allowed'
+                      isEditing ? 'bg-surface' : 'bg-muted/20 cursor-not-allowed'
                     }`}
                     value={profileData.contactNumber}
                     onChange={(e) =>
@@ -246,7 +246,7 @@ export default function ProfilePage() {
                   <User className="absolute w-5 h-5 transform -translate-y-1/2 left-3 top-1/2 text-muted" />
                   <input
                     type="text"
-                    className="w-full py-3 pl-10 pr-4 border rounded-lg border-muted bg-gray-50 text-primary cursor-not-allowed capitalize"
+                    className="w-full py-3 pl-10 pr-4 border rounded-lg border-muted bg-muted/20 text-primary cursor-not-allowed capitalize"
                     value={profileData.role}
                     disabled
                   />
@@ -263,7 +263,7 @@ export default function ProfilePage() {
                   <input
                     type="text"
                     className={`w-full py-3 pl-10 pr-4 border rounded-lg border-muted text-primary focus:outline-none focus:ring-2 focus:ring-primary ${
-                      isEditing ? 'bg-surface' : 'bg-gray-50 cursor-not-allowed'
+                      isEditing ? 'bg-surface' : 'bg-muted/20 cursor-not-allowed'
                     }`}
                     value={profileData.organizationName}
                     onChange={(e) =>
@@ -287,7 +287,7 @@ export default function ProfilePage() {
                   <input
                     type="url"
                     className={`w-full py-3 pl-10 pr-4 border rounded-lg border-muted text-primary focus:outline-none focus:ring-2 focus:ring-primary ${
-                      isEditing ? 'bg-surface' : 'bg-gray-50 cursor-not-allowed'
+                      isEditing ? 'bg-surface' : 'bg-muted/20 cursor-not-allowed'
                     }`}
                     value={profileData.organizationWebsite}
                     onChange={(e) =>
