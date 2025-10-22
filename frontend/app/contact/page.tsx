@@ -62,7 +62,7 @@ export default function ContactPage() {
       })
       setFormData({ name: '', email: '', subject: '', message: '' })
       setErrors({})
-    } catch (error) {
+    } catch {
       toast.error('Failed to send message. Please try again.')
     } finally {
       setLoading(false)
@@ -71,18 +71,21 @@ export default function ContactPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    })
+    }))
     
     // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      })
-    }
+    setErrors(prev => {
+      if (prev[name]) {
+        return {
+          ...prev,
+          [name]: ''
+        }
+      }
+      return prev
+    })
   }
 
   return (
