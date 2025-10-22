@@ -24,6 +24,7 @@ const navigation = [
   { name: 'My Tickets', href: '/user/tickets', icon: Ticket },
   { name: 'Favorites', href: '/user/favorites', icon: Heart },
   { name: 'Payments', href: '/user/payments', icon: CreditCard },
+  { name: 'Notifications', href: '/user/notifications', icon: Bell },
   { name: 'Profile', href: '/user/profile', icon: User },
 ]
 

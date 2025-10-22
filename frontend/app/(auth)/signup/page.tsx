@@ -83,22 +83,10 @@ export default function SignupPage() {
       
       console.log('Registration response:', response)
       
-      // Handle immediate login after signup
-      if (response.data.access_token) {
-        setAuth(response.data.user, response.data.access_token)
-        toast.success('Account created successfully! Welcome to EventAddis.', { id: loadingToast })
-        
-        // Redirect based on role
-        const redirectPath = response.data.user.role === 'organizer' ? '/dashboard' : '/user'
-        setTimeout(() => {
-          router.push(redirectPath)
-        }, 1000)
-      } else {
-        toast.success('Account created successfully!', { id: loadingToast })
-        setTimeout(() => {
-          router.push('/login')
-        }, 1000)
-      }
+      toast.success('Account created successfully! Please sign in to continue.', { id: loadingToast })
+      setTimeout(() => {
+        router.push('/login')
+      }, 1000)
     } catch (err: any) {
       console.error('Registration error:', err)
       console.error('Error response:', err.response)
@@ -146,12 +134,14 @@ export default function SignupPage() {
               }}
               className={`p-4 border-2 rounded-lg text-center transition-all ${
                 selectedRole === 'attendee'
-                  ? 'border-primary bg-primary/10'
-                  : 'border-muted hover:border-primary/50'
+                  ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-lg'
+                  : 'border-muted hover:border-primary/50 hover:bg-surface'
               }`}
               suppressHydrationWarning
             >
-              <User className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+              <User className={`h-8 w-8 mx-auto mb-2 ${
+                selectedRole === 'attendee' ? 'text-primary' : 'text-purple-600'
+              }`} />
               <div className="font-medium text-primary">Attend Events</div>
               <div className="text-sm text-muted">Discover and join events</div>
             </button>
@@ -163,12 +153,14 @@ export default function SignupPage() {
               }}
               className={`p-4 border-2 rounded-lg text-center transition-all ${
                 selectedRole === 'organizer'
-                  ? 'border-primary bg-primary/10'
-                  : 'border-muted hover:border-primary/50'
+                  ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-lg'
+                  : 'border-muted hover:border-primary/50 hover:bg-surface'
               }`}
               suppressHydrationWarning
             >
-              <Building className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+              <Building className={`h-8 w-8 mx-auto mb-2 ${
+                selectedRole === 'organizer' ? 'text-primary' : 'text-purple-600'
+              }`} />
               <div className="font-medium text-primary">Organize Events</div>
               <div className="text-sm text-muted">Create and manage events</div>
             </button>
@@ -292,18 +284,18 @@ export default function SignupPage() {
             {selectedRole === 'organizer' && (
               <>
                 <div>
-                  <label htmlFor="organizationName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="organizationName" className="block text-sm font-medium text-primary mb-2">
                     Organization Name
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Building className="h-5 w-5 text-gray-400" />
+                      <Building className="h-5 w-5 text-muted" />
                     </div>
                     <input
                       id="organizationName"
                       name="organizationName"
                       type="text"
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="block w-full pl-10 pr-3 py-3 border border-muted rounded-lg bg-surface text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       placeholder="Your organization name"
                       value={formData.organizationName}
                       onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
@@ -312,18 +304,18 @@ export default function SignupPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="contactNumber" className="block text-sm font-medium text-primary mb-2">
                     Contact Number
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-5 w-5 text-gray-400" />
+                      <Phone className="h-5 w-5 text-muted" />
                     </div>
                     <input
                       id="contactNumber"
                       name="contactNumber"
                       type="tel"
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="block w-full pl-10 pr-3 py-3 border border-muted rounded-lg bg-surface text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       placeholder="+251 911 123 456"
                       value={formData.contactNumber}
                       onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
@@ -332,18 +324,18 @@ export default function SignupPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="organizationWebsite" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="organizationWebsite" className="block text-sm font-medium text-primary mb-2">
                     Website (Optional)
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Globe className="h-5 w-5 text-gray-400" />
+                      <Globe className="h-5 w-5 text-muted" />
                     </div>
                     <input
                       id="organizationWebsite"
                       name="organizationWebsite"
                       type="url"
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="block w-full pl-10 pr-3 py-3 border border-muted rounded-lg bg-surface text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       placeholder="https://yourwebsite.com"
                       value={formData.organizationWebsite}
                       onChange={(e) => setFormData({ ...formData, organizationWebsite: e.target.value })}

@@ -163,6 +163,14 @@ Event-Addis/
 - **Receipt Generation**: Digital receipts for all transactions
 - **Refund Support**: Built-in refund handling
 
+### Test Payment Information
+**Note**: The payment system is currently in test mode. Use these test numbers for successful transactions:
+
+**Awash Bank Mobile Money**
+- Phone: `0900123456`
+
+*Any other phone numbers will return a failed payment status.*
+
 ## 📧 Email System
 
 - **Brevo Integration**: Reliable email delivery
