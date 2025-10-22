@@ -26,8 +26,6 @@ const navigation = [
   { name: "Events", href: "/dashboard/events", icon: Calendar },
   { name: "Bookings", href: "/dashboard/bookings", icon: Ticket },
   { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
-  { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
-  { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Profile", href: "/dashboard/profile", icon: Settings },
 ];

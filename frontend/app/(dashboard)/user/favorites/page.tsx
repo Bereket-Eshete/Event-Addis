@@ -84,7 +84,7 @@ export default function FavoritesPage() {
           >
             <div className="relative h-48">
               <Image
-                src={event.image || "/event-one-min.jpg"}
+                src={event.bannerUrl || event.image || "/event-one-min.jpg"}
                 alt={event.title || "Event image"}
                 fill
                 className="object-cover"

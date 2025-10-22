@@ -3,6 +3,9 @@
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 const events = [
   {
@@ -60,6 +63,20 @@ const events = [
 ];
 
 export function PopularEventsSection() {
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  const handleRegister = () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to register for events');
+      router.push('/login');
+    } else {
+      // Redirect based on user role
+      const redirectPath = user?.role === 'organizer' ? '/dashboard' : '/user/browse';
+      router.push(redirectPath);
+    }
+  };
+
   return (
     <section className="py-24 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -145,9 +162,10 @@ export function PopularEventsSection() {
                   
                   <button 
                     type="button"
+                    onClick={handleRegister}
                     className="w-full bg-amber-500 dark:bg-amber-500 text-white hover:bg-amber-600 dark:hover:bg-amber-600 group-hover:scale-105 transition-all shadow-md rounded-lg py-2 px-4 font-medium text-sm"
                   >
-                    Register Now
+                    {isAuthenticated ? 'Browse Events' : 'Register Now'}
                   </button>
                 </div>
               </div>

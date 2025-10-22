@@ -49,7 +49,7 @@ export const authAPI = {
   forgotPassword: (email: string) =>
     api.post('/auth/forgot-password', { email }),
   
-  resetPassword: (data: { token: string; newPassword: string }) =>
+  resetPassword: (data: { email: string; newPassword: string }) =>
     api.post('/auth/reset-password', data),
   
   googleAuth: (token: string) =>

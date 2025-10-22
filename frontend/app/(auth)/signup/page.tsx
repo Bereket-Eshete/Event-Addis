@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User, Building, Phone, Globe, Calendar } from 'lucide-react'
 import { authAPI } from '@/lib/api'
+import { useAuth } from '@/lib/auth'
 import toast from 'react-hot-toast'
 
 type UserRole = 'attendee' | 'organizer'
@@ -28,6 +29,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const { setAuth } = useAuth()
 
   useEffect(() => {
     // Test backend connection
@@ -80,12 +82,23 @@ export default function SignupPage() {
       })
       
       console.log('Registration response:', response)
-      toast.success('Account created successfully! Check your email for verification.', { id: loadingToast })
       
-      // Small delay to ensure toast is shown before redirect
-      setTimeout(() => {
-        router.push(`/signup-success?email=${encodeURIComponent(formData.email)}`)
-      }, 1000)
+      // Handle immediate login after signup
+      if (response.data.access_token) {
+        setAuth(response.data.user, response.data.access_token)
+        toast.success('Account created successfully! Welcome to EventAddis.', { id: loadingToast })
+        
+        // Redirect based on role
+        const redirectPath = response.data.user.role === 'organizer' ? '/dashboard' : '/user'
+        setTimeout(() => {
+          router.push(redirectPath)
+        }, 1000)
+      } else {
+        toast.success('Account created successfully!', { id: loadingToast })
+        setTimeout(() => {
+          router.push('/login')
+        }, 1000)
+      }
     } catch (err: any) {
       console.error('Registration error:', err)
       console.error('Error response:', err.response)

@@ -27,27 +27,28 @@ export default function DiscoverPage() {
   const fetchEvents = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams()
+      const params: any = {}
+      
       if (searchTerm) {
-        params.append('search', searchTerm)
-        params.append('title', searchTerm)
-        params.append('description', searchTerm)
-        params.append('venue', searchTerm)
+        params.search = searchTerm
       }
-      if (selectedCategory) params.append('category', selectedCategory)
-      if (selectedType) params.append('type', selectedType)
+      if (selectedCategory) {
+        params.category = selectedCategory
+      }
+      if (selectedType) {
+        params.type = selectedType
+      }
       if (priceFilter === 'free') {
-        params.append('price', '0')
-        params.append('maxPrice', '0')
-      }
-      if (priceFilter === 'paid') {
-        params.append('minPrice', '1')
+        params.price = 0
+      } else if (priceFilter === 'paid') {
+        params.minPrice = 1
       }
       
-      const response = await eventsAPI.getAllEvents(Object.fromEntries(params))
+      const response = await eventsAPI.getAllEvents(params)
       setEvents(response.data.events || [])
     } catch (error: any) {
       console.error('Failed to fetch events:', error)
+      toast.error('Failed to load events')
     } finally {
       setLoading(false)
     }
@@ -82,54 +83,57 @@ export default function DiscoverPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Search and Filters */}
-        <div className="bg-surface rounded-lg p-6 mb-8 border border-muted">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="bg-surface rounded-lg p-4 sm:p-6 mb-8 border border-muted">
+          <div className="space-y-4">
             {/* Search */}
-            <div className="lg:col-span-2 relative">
+            <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search events..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 border-2 border-muted rounded-full bg-background text-primary placeholder-muted focus:outline-none focus:border-primary transition-colors text-lg"
+                className="w-full pl-12 pr-4 py-3 sm:py-4 border-2 border-muted rounded-full bg-background text-primary placeholder-muted focus:outline-none focus:border-primary transition-colors text-base sm:text-lg"
               />
             </div>
+            
+            {/* Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Category Filter */}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-3 sm:px-4 py-2 sm:py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm sm:text-base"
+              >
+                <option value="">All Categories</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
 
-            {/* Category Filter */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
+              {/* Type Filter */}
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="px-3 sm:px-4 py-2 sm:py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm sm:text-base"
+              >
+                <option value="">All Types</option>
+                {types.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
 
-            {/* Type Filter */}
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="px-4 py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="">All Types</option>
-              {types.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-
-            {/* Price Filter */}
-            <select
-              value={priceFilter}
-              onChange={(e) => setPriceFilter(e.target.value)}
-              className="px-4 py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="">All Prices</option>
-              <option value="free">Free Events</option>
-              <option value="paid">Paid Events</option>
-            </select>
+              {/* Price Filter */}
+              <select
+                value={priceFilter}
+                onChange={(e) => setPriceFilter(e.target.value)}
+                className="px-3 sm:px-4 py-2 sm:py-3 border border-muted rounded-lg bg-background text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm sm:text-base sm:col-span-2 lg:col-span-1"
+              >
+                <option value="">All Prices</option>
+                <option value="free">Free Events</option>
+                <option value="paid">Paid Events</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -206,16 +210,16 @@ export default function DiscoverPage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <button
                       onClick={() => handleViewDetails(event._id)}
-                      className="flex-1 py-2 px-4 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors"
+                      className="flex-1 py-2 px-4 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors text-sm sm:text-base"
                     >
                       View Details
                     </button>
                     <button
                       onClick={() => handleBookEvent(event._id)}
-                      className="flex-1 py-2 px-4 text-white rounded-lg gradient-primary hover:opacity-90 transition-opacity"
+                      className="flex-1 py-2 px-4 text-white rounded-lg gradient-primary hover:opacity-90 transition-opacity text-sm sm:text-base"
                     >
                       Book Now
                     </button>

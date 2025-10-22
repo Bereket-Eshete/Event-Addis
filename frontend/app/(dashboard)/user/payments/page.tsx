@@ -39,49 +39,51 @@ export default function PaymentsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-primary">Payment History</h1>
-        <div className="bg-surface border border-muted rounded-lg p-4">
+        <div className="bg-surface border border-muted rounded-lg p-4 text-center sm:text-left">
           <p className="text-sm text-muted">Total Spent</p>
-          <p className="text-xl font-bold text-primary">{totalSpent} ETB</p>
+          <p className="text-xl font-bold text-primary">{totalSpent.toLocaleString()} ETB</p>
         </div>
       </div>
       
       <div className="space-y-4">
         {payments.map((payment: any) => (
-          <div key={payment._id} className="bg-surface border border-muted rounded-lg p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
+          <div key={payment._id} className="bg-surface border border-muted rounded-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-3">
+              <div className="flex-1">
                 <h3 className="text-lg font-semibold text-primary">{payment.eventId?.title}</h3>
                 <p className="text-sm text-muted">Booking Ref: EA-{payment._id.slice(-6).toUpperCase()}</p>
               </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-primary">{payment.totalAmount} ETB</p>
-                <div className="flex items-center space-x-1 mt-1">
-                  {payment.status === 'confirmed' ? (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Clock className="h-4 w-4 text-yellow-500" />
-                  )}
-                  <span className={`text-xs font-medium ${
-                    payment.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'
-                  }`}>
-                    {payment.status}
-                  </span>
+              <div className="flex flex-row sm:flex-col sm:text-right items-center sm:items-end justify-between sm:justify-start gap-2">
+                <p className="text-lg font-bold text-primary">{payment.totalAmount.toLocaleString()} ETB</p>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
+                    {payment.status === 'confirmed' ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Clock className="h-4 w-4 text-yellow-500" />
+                    )}
+                    <span className={`text-xs font-medium ${
+                      payment.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'
+                    }`}>
+                      {payment.status}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setSelectedPayment(payment);
+                      setShowReceiptModal(true);
+                    }}
+                    className="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-primary/90"
+                  >
+                    Receipt
+                  </button>
                 </div>
-                <button 
-                  onClick={() => {
-                    setSelectedPayment(payment);
-                    setShowReceiptModal(true);
-                  }}
-                  className="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-primary/90 mt-1 block"
-                >
-                  Receipt
-                </button>
               </div>
             </div>
             
-            <div className="flex justify-between items-center text-sm text-muted">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm text-muted gap-2">
               <div className="flex items-center space-x-2">
                 <CreditCard className="h-4 w-4" />
                 <span>{payment.paymentMethod || 'Chapa'}</span>

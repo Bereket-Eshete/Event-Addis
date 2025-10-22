@@ -7,13 +7,13 @@ import { Eye, EyeOff, Lock, Calendar, CheckCircle, AlertCircle } from 'lucide-re
 import { authAPI } from '@/lib/api'
 import toast from 'react-hot-toast'
 
-function TokenHandler({ onTokenReceived }: { onTokenReceived: (token: string | null) => void }) {
+function EmailHandler({ onEmailReceived }: { onEmailReceived: (email: string | null) => void }) {
   const searchParams = useSearchParams()
   
   useEffect(() => {
-    const token = searchParams.get('token')
-    onTokenReceived(token)
-  }, [searchParams, onTokenReceived])
+    const email = searchParams.get('email')
+    onEmailReceived(email)
+  }, [searchParams, onEmailReceived])
   
   return null
 }
@@ -24,7 +24,7 @@ export default function ResetPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [token, setToken] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
@@ -33,11 +33,11 @@ export default function ResetPasswordPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (token === null) return // Still loading
-    if (!token) {
-      setError('Invalid or missing reset token')
+    if (email === null) return // Still loading
+    if (!email) {
+      setError('Invalid or missing email parameter')
     }
-  }, [token])
+  }, [email])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,7 +59,7 @@ export default function ResetPasswordPage() {
     
     try {
       await authAPI.resetPassword({
-        token: token!,
+        email: email!,
         newPassword: formData.password
       })
       toast.success('Password reset successfully!', { id: loadingToast })
@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
     )
   }
 
-  if (error && !token) {
+  if (error && !email) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
@@ -136,7 +136,7 @@ export default function ResetPasswordPage() {
               Invalid reset link
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              This password reset link is invalid or has expired. Please request a new one.
+              This password reset link is invalid or missing email parameter. Please request a new one.
             </p>
             
             <Link
@@ -154,7 +154,7 @@ export default function ResetPasswordPage() {
   return (
     <>
       <Suspense fallback={null}>
-        <TokenHandler onTokenReceived={setToken} />
+        <EmailHandler onEmailReceived={setEmail} />
       </Suspense>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">

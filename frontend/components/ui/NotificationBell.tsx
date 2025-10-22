@@ -50,43 +50,58 @@ export function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-muted z-50">
-          <div className="p-4 border-b border-muted">
-            <h3 className="font-semibold text-primary">Notifications</h3>
-          </div>
-          <div className="max-h-96 overflow-y-auto">
-            {notifications.length === 0 ? (
-              <div className="p-4 text-center text-muted">
-                No notifications
-              </div>
-            ) : (
-              notifications.map((notification: any) => (
-                <div
-                  key={notification._id}
-                  className={`p-4 border-b border-muted hover:bg-surface/50 cursor-pointer ${
-                    !notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                  }`}
-                  onClick={() => {
-                    if (!notification.isRead) {
-                      markAsRead(notification._id);
-                    }
-                    setIsOpen(false);
-                  }}
-                >
-                  <div className="font-medium text-primary text-sm">
-                    {notification.title}
-                  </div>
-                  <div className="text-sm text-muted mt-1 line-clamp-2">
-                    {notification.message}
-                  </div>
-                  <div className="text-xs text-muted mt-2">
-                    {new Date(notification.createdAt).toLocaleDateString()}
-                  </div>
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface rounded-lg shadow-xl border border-muted z-50 max-w-[calc(100vw-2rem)] sm:max-w-none">
+            <div className="p-4 border-b border-muted">
+              <h3 className="font-semibold text-primary">Notifications</h3>
+            </div>
+            <div className="max-h-80 sm:max-h-96 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-6 text-center text-muted">
+                  <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No notifications</p>
                 </div>
-              ))
-            )}
+              ) : (
+                notifications.map((notification: any) => (
+                  <div
+                    key={notification._id}
+                    className={`p-4 border-b border-muted hover:bg-accent/10 cursor-pointer transition-colors ${
+                      !notification.isRead ? 'bg-primary/5 border-l-4 border-l-primary' : ''
+                    }`}
+                    onClick={() => {
+                      if (!notification.isRead) {
+                        markAsRead(notification._id);
+                      }
+                      setIsOpen(false);
+                    }}
+                  >
+                    <div className="font-medium text-primary text-sm mb-1">
+                      {notification.title}
+                    </div>
+                    <div className="text-sm text-muted mb-2 line-clamp-2">
+                      {notification.message}
+                    </div>
+                    <div className="text-xs text-muted">
+                      {new Date(notification.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="p-3 border-t border-muted">
+              <button 
+                className="w-full text-sm text-primary hover:text-accent font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                View All Notifications
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

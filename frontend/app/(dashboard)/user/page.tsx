@@ -188,46 +188,54 @@ export default function UserDashboardPage() {
           </Link>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {loading ? (
             Array.from({ length: 2 }).map((_, i) => (
               <div key={i} className="border border-muted rounded-lg p-4 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-muted/20 rounded mb-2"></div>
+                <div className="h-6 bg-muted/20 rounded mb-4"></div>
+                <div className="h-4 bg-muted/20 rounded mb-2"></div>
+                <div className="h-4 bg-muted/20 rounded"></div>
               </div>
             ))
+          ) : recommendedEvents.length === 0 ? (
+            <div className="col-span-full text-center py-8">
+              <Calendar className="w-12 h-12 mx-auto text-muted mb-4" />
+              <p className="text-muted">No recommendations available</p>
+            </div>
           ) : (
             recommendedEvents.map((event: any) => (
               <div key={event._id} className="border border-muted rounded-lg p-4 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-primary">{event.title}</h3>
-                  <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium capitalize">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
+                  <h3 className="font-semibold text-primary flex-1">{event.title}</h3>
+                  <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium capitalize self-start">
                     {event.category}
                   </span>
                 </div>
                 
                 <div className="space-y-2 text-sm text-muted mb-4">
                   <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(event.startAt).toLocaleDateString()}
+                    <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">{new Date(event.startAt).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    {event.venue}
+                    <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">{event.venue}</span>
                   </div>
                   <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2" />
-                    {event.capacity} capacity
+                    <Users className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span>{event.capacity} capacity</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold text-primary">
-                    {event.price === 0 ? 'Free' : `${event.price} ETB`}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="font-semibold text-primary text-lg">
+                    {event.price === 0 ? 'Free' : `${event.price.toLocaleString()} ETB`}
                   </div>
-                  <button className="btn-cta px-4 py-2 rounded-lg text-sm">
+                  <button 
+                    onClick={() => window.location.href = `/user/events/${event._id}`}
+                    className="btn-primary px-4 py-2 rounded-lg text-sm w-full sm:w-auto"
+                  >
                     Book Now
                   </button>
                 </div>
