@@ -50,8 +50,8 @@ EventAddis connects event seekers and organizers in one place, providing a seaml
 
 ## 🚀 Live Demo
 
-- **Frontend**: [https://event-addis.vercel.app](https://event-addis.vercel.app)
-- **Backend API**: [https://event-addis.onrender.com](https://event-addis.onrender.com)
+- **Live Link**: [https://event-addis.vercel.app](https://event-addis.vercel.app)
+
 
 ## 📋 Prerequisites
 
