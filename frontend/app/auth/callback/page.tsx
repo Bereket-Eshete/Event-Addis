@@ -46,7 +46,7 @@ function CallbackHandler() {
 
   return null
 }
-
+// loading ui components
 function LoadingUI() {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: 'var(--bg)'}}>
